@@ -1,6 +1,11 @@
 import { Router } from "express";
+import { createCard } from "../controllers/cardsControllers";
 import { validateReqCard } from "../middlewares/cardsMiddleware";
 
 export const cardsRouter = Router();
 
-cardsRouter.post("/employees/:employeeId/cards/:cardType", validateReqCard);
+cardsRouter.post(
+  "/employees/:employeeId/cards/:cardType",
+  validateReqCard,
+  createCard
+);
