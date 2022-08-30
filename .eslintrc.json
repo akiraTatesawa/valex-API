@@ -16,7 +16,6 @@
     },
     "plugins": [
         "import",
-        "@typescript-eslint",
         "prettier"
     ],
     "globals": {
@@ -27,13 +26,9 @@
     "rules": {
         "no-console": "off",
         "prettier/prettier": "error",
-        "import/extensions": [
-            "error",
-            "ignorePackages",
-            {
-                "ts": "always"
-            }
-        ],
+        "@typescript-eslint/comma-dangle": "off",
+        "operator-linebreak": "off",
+
         
         "@typescript-eslint/quotes": "off",
         "camelcase": "off",

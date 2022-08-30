@@ -1,4 +1,4 @@
-import "./config/config.ts";
+import "./config/config";
 import cors from "cors";
 import express from "express";
 
@@ -6,7 +6,8 @@ const server = express();
 
 server.use(cors());
 server.use(express.json());
+const { PORT } = process.env;
 
-server.listen(process.env.PORT, () => {
-  console.log("server is running on port 3333");
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
