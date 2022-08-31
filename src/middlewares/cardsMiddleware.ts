@@ -128,9 +128,6 @@ export async function validateCardRecharge(
       "Card Id must be a number"
     );
   }
-
-  console.log(API_KEY);
-
   const { error: bodyError } = rechargeCardSchema.validate(req.body, {
     abortEarly: false,
   });
@@ -152,6 +149,8 @@ export async function validateCardRecharge(
       .join("; ");
     throw new CustomError("error_unprocessable_entity", message);
   }
+
+  res.locals.API_KEY = API_KEY;
 
   return next();
 }

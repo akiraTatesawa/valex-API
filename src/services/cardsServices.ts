@@ -1,6 +1,7 @@
 import * as CompanyRepository from "../repositories/companyRepository";
 import * as EmployeeRepository from "../repositories/employeeRepository";
 import * as CardRepository from "../repositories/cardRepository";
+import * as RechargeRepository from "../repositories/rechargeRepository";
 import * as CardUtils from "../utils/cardUtils";
 import { CustomError } from "../classes/CustomError";
 import { Card } from "../classes/Card";
@@ -106,4 +107,28 @@ export async function unblockCard(cardId: number, password: string) {
   }
 
   await CardRepository.update(cardId, { isBlocked: false });
+}
+
+export async function rechargeCard(
+  cardId: number,
+  API_KEY: string,
+  amount: number
+) {
+  const company = await CompanyRepository.findByApiKey(API_KEY);
+  if (!company) {
+    throw new CustomError("error_not_found", "Company not found");
+  }
+
+  const card = await CardRepository.findById(cardId);
+  if (!card) {
+    throw new CustomError("error_not_found", "Card not found");
+  }
+  if (!card?.password) {
+    throw new CustomError("error_bad_request", "This card is not activated");
+  }
+  if (CardUtils.setIsExpired(card.expirationDate)) {
+    throw new CustomError("error_bad_request", "This card is expired");
+  }
+
+  await RechargeRepository.insert({ cardId, amount });
 }

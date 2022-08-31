@@ -53,3 +53,16 @@ export async function unblockCard(
 
   return res.sendStatus(200);
 }
+
+export async function rechargeCard(
+  req: Request<{ cardId: string }, {}, { amount: number }>,
+  res: Response
+) {
+  const { cardId } = req.params;
+  const { amount } = req.body;
+  const { API_KEY } = res.locals;
+
+  await CardsServices.rechargeCard(parseInt(cardId, 10), API_KEY, amount);
+
+  return res.sendStatus(201);
+}
