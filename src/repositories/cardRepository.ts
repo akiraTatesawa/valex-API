@@ -1,29 +1,10 @@
 import { connection } from "../dbStrategy/postgres/connection";
+import { Card } from "../interfaces/cardInterfaces";
+import { TransactionTypes } from "../types/cardTypes";
 import { mapObjectToUpdateQuery } from "../utils/sqlUtils";
 
-export type TransactionTypes =
-  | "groceries"
-  | "restaurant"
-  | "transport"
-  | "education"
-  | "health";
-
-export interface Card {
-  id: number;
-  employeeId: number;
-  number: string;
-  cardholderName: string;
-  securityCode: string;
-  expirationDate: string;
-  password?: string;
-  isVirtual: boolean;
-  originalCardId?: number;
-  isBlocked: boolean;
-  type: TransactionTypes;
-}
-
-export type CardInsertData = Omit<Card, "id">;
-export type CardUpdateData = Partial<Card>;
+type CardInsertData = Omit<Card, "id">;
+type CardUpdateData = Partial<Card>;
 
 export async function find() {
   const result = await connection.query<Card>("SELECT * FROM cards");

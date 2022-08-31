@@ -1,11 +1,5 @@
 import { connection } from "../dbStrategy/postgres/connection";
-import { TransactionTypes } from "./cardRepository";
-
-export interface Business {
-  id: number;
-  name: string;
-  type: TransactionTypes;
-}
+import { Business } from "../interfaces/businessInterfaces";
 
 export async function findById(id: number) {
   const result = await connection.query<Business, [number]>(
