@@ -1,11 +1,6 @@
 import { connection } from "../dbStrategy/postgres/connection";
+import { Recharge } from "../interfaces/rechargeInterfaces";
 
-export interface Recharge {
-  id: number;
-  cardId: number;
-  timestamp: Date;
-  amount: number;
-}
 export type RechargeInsertData = Omit<Recharge, "id" | "timestamp">;
 
 export async function findByCardId(cardId: number) {

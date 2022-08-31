@@ -1,10 +1,5 @@
 import { connection } from "../dbStrategy/postgres/connection";
-
-export interface Company {
-  id: number;
-  name: string;
-  apiKey?: string;
-}
+import { Company } from "../interfaces/companyInterfaces";
 
 export async function findByApiKey(apiKey: string) {
   const result = await connection.query<Company, [string]>(

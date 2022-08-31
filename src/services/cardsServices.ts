@@ -4,11 +4,12 @@ import * as CardRepository from "../repositories/cardRepository";
 import * as CardUtils from "../utils/cardUtils";
 import { CustomError } from "../classes/CustomError";
 import { Card } from "../classes/Card";
+import { TransactionTypes } from "../types/cardTypes";
 
 export async function createNewCard(
   API_KEY: string,
   employeeId: number,
-  cardType: CardRepository.TransactionTypes
+  cardType: TransactionTypes
 ) {
   const company = await CompanyRepository.findByApiKey(API_KEY);
   if (!company) {
