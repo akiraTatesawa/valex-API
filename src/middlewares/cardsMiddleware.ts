@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../classes/CustomError";
 import {
   activationCardSchema,
+  blockUnblockCardSchema,
   createCardSchema,
 } from "../schemas/cardsSchemas";
 
@@ -43,6 +44,29 @@ export async function validateCardActivation(
   const { error } = activationCardSchema.validate(req.body, {
     abortEarly: false,
   });
+  if (error) {
+    const message = error.details.map((detail) => detail.message).join("; ");
+    throw new CustomError("error_bad_request", message);
+  }
+
+  return next();
+}
+
+export async function validateCardBlockUnblock(
+  req: Request<{ cardId: string }, {}, { password: string }>,
+  res: Response,
+  next: NextFunction
+) {
+  const { password } = req.body;
+
+  if (!password) {
+    throw new CustomError("error_bad_request", "Password missing");
+  }
+
+  const { error } = blockUnblockCardSchema.validate(req.body, {
+    abortEarly: false,
+  });
+
   if (error) {
     const message = error.details.map((detail) => detail.message).join("; ");
     throw new CustomError("error_bad_request", message);
