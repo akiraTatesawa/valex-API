@@ -8,11 +8,11 @@ export async function createCard(
   const { employeeId } = req.params;
   const { API_KEY, cardType } = res.locals;
 
-  const result = await CardsServices.createNewCard(
+  await CardsServices.createNewCard(
     API_KEY,
     parseInt(employeeId, 10),
     cardType
   );
 
-  return res.send(result);
+  return res.sendStatus(201);
 }
