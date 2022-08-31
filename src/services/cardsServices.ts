@@ -64,7 +64,6 @@ export async function activateCard(
   const encryptedPassword = encryptData(password);
   await CardRepository.update(cardId, { password: encryptedPassword });
 }
-
 export async function blockCard(cardId: number, password: string) {
   const card = await CardRepository.findById(cardId);
 
@@ -85,4 +84,26 @@ export async function blockCard(cardId: number, password: string) {
   }
 
   await CardRepository.update(cardId, { isBlocked: true });
+}
+
+export async function unblockCard(cardId: number, password: string) {
+  const card = await CardRepository.findById(cardId);
+
+  if (!card) {
+    throw new CustomError("error_not_found", "Card not found");
+  }
+  if (!card?.password) {
+    throw new CustomError("error_bad_request", "This card is not activated");
+  }
+  if (CardUtils.setIsExpired(card.expirationDate)) {
+    throw new CustomError("error_bad_request", "This card is expired");
+  }
+  if (!card.isBlocked) {
+    throw new CustomError("error_bad_request", "This card is not blocked");
+  }
+  if (decryptData(card.password) !== password) {
+    throw new CustomError("error_unauthorized", "Wrong password");
+  }
+
+  await CardRepository.update(cardId, { isBlocked: false });
 }
