@@ -3,6 +3,7 @@ import {
   activateCard,
   blockCard,
   createCard,
+  unblockCard,
 } from "../controllers/cardsControllers";
 import {
   validateCardActivation,
@@ -25,3 +26,9 @@ cardsRouter.patch(
 );
 
 cardsRouter.patch("/cards/:cardId/block", validateCardBlockUnblock, blockCard);
+
+cardsRouter.patch(
+  "/cards/:cardId/unblock",
+  validateCardBlockUnblock,
+  unblockCard
+);

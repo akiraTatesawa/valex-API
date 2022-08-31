@@ -41,3 +41,15 @@ export async function blockCard(
 
   return res.sendStatus(200);
 }
+
+export async function unblockCard(
+  req: Request<{ cardId: string }, {}, { password: string }>,
+  res: Response
+) {
+  const { cardId } = req.params;
+  const { password } = req.body;
+
+  await CardsServices.unblockCard(parseInt(cardId, 10), password);
+
+  return res.sendStatus(200);
+}
