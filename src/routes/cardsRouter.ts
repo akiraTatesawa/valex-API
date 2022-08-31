@@ -1,7 +1,12 @@
 import { Router } from "express";
-import { activateCard, createCard } from "../controllers/cardsControllers";
+import {
+  activateCard,
+  blockCard,
+  createCard,
+} from "../controllers/cardsControllers";
 import {
   validateCardActivation,
+  validateCardBlockUnblock,
   validateCardCreation,
 } from "../middlewares/cardsMiddleware";
 
@@ -18,3 +23,5 @@ cardsRouter.patch(
   validateCardActivation,
   activateCard
 );
+
+cardsRouter.patch("/cards/:cardId/block", validateCardBlockUnblock, blockCard);

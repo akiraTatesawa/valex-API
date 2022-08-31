@@ -29,3 +29,15 @@ export async function activateCard(
 
   return res.sendStatus(200);
 }
+
+export async function blockCard(
+  req: Request<{ cardId: string }, {}, { password: string }>,
+  res: Response
+) {
+  const { cardId } = req.params;
+  const { password } = req.body;
+
+  await CardsServices.blockCard(parseInt(cardId, 10), password);
+
+  return res.sendStatus(200);
+}
