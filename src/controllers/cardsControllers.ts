@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import * as CardsServices from "../services/cardsServices";
+import { TransactionTypes } from "../types/cardTypes";
 
 export async function createCard(
-  req: Request<{ employeeId: string }>,
+  req: Request<{ employeeId: string; cardType: TransactionTypes }>,
   res: Response
 ) {
-  const { employeeId } = req.params;
-  const { API_KEY, cardType } = res.locals;
+  const { employeeId, cardType } = req.params;
+  const { API_KEY } = res.locals;
 
   await CardsServices.createNewCard(
     API_KEY,

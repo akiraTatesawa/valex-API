@@ -21,27 +21,30 @@ export async function errorHandlingMiddleware(
   _next: NextFunction
 ) {
   const Errors: ErrorsType = {
+    error_bad_request: {
+      status: 400,
+    },
+    error_unauthorized: {
+      status: 401,
+    },
+    error_forbidden: {
+      status: 403,
+    },
     error_not_found: {
       status: 404,
     },
     error_conflict: {
       status: 409,
     },
-    error_unauthorized: {
-      status: 401,
-    },
-    error_bad_request: {
-      status: 400,
-    },
-    error_forbidden: {
-      status: 403,
+    error_unprocessable_entity: {
+      status: 422,
     },
   };
-
+  console.log(error);
   const { message, type } = error;
-  const { status } = Errors[type];
 
-  if (status) {
+  if (Errors[type]?.status) {
+    const { status } = Errors[type];
     return res.status(status).send(message);
   }
 
