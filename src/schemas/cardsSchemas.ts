@@ -8,10 +8,22 @@ export const createCardSchema = Joi.object({
 });
 
 export const activationCardSchema = Joi.object({
-  CVC: Joi.string().length(3).pattern(/^\d+$/).required(),
-  password: Joi.string().length(4).pattern(/^\d+$/).required(),
+  CVC: Joi.string()
+    .length(3)
+    .pattern(/^\d+$/)
+    .message(`"CVC" must only contain numbers`)
+    .required(),
+  password: Joi.string()
+    .length(4)
+    .pattern(/^\d+$/)
+    .message(`"password" must only contain numbers`)
+    .required(),
 });
 
 export const blockUnblockCardSchema = Joi.object({
-  password: Joi.string().length(4).pattern(/^\d+$/).required(),
+  password: Joi.string()
+    .length(4)
+    .pattern(/^\d+$/)
+    .message(`"password" must only contain numbers`)
+    .required(),
 });

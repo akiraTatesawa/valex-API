@@ -7,12 +7,19 @@ import {
 } from "../schemas/cardsSchemas";
 
 export async function validateCardCreation(
-  req: Request<{ cardType: string }>,
+  req: Request<{ cardType: string; employeeId: string }>,
   res: Response,
   next: NextFunction
 ) {
-  const { cardType } = req.params;
+  const { cardType, employeeId } = req.params;
   const { "x-api-key": API_KEY } = req.headers;
+
+  if (!employeeId.match(/^\d+$/)) {
+    throw new CustomError(
+      "error_unprocessable_entity",
+      "Employee Id must be a number"
+    );
+  }
 
   const { error } = createCardSchema.validate(
     { API_KEY, cardType },
@@ -21,7 +28,7 @@ export async function validateCardCreation(
 
   if (error) {
     const message = error.details.map((detail) => detail.message).join("; ");
-    throw new CustomError("error_bad_request", message);
+    throw new CustomError("error_unprocessable_entity", message);
   }
 
   res.locals.cardType = cardType;
@@ -36,6 +43,14 @@ export async function validateCardActivation(
   next: NextFunction
 ) {
   const { password, CVC } = req.body;
+  const { cardId } = req.params;
+
+  if (!cardId.match(/^\d+$/)) {
+    throw new CustomError(
+      "error_unprocessable_entity",
+      "Card Id must be a number"
+    );
+  }
 
   if (!password || !CVC) {
     throw new CustomError("error_bad_request", "Password or CVC missing");
@@ -46,7 +61,7 @@ export async function validateCardActivation(
   });
   if (error) {
     const message = error.details.map((detail) => detail.message).join("; ");
-    throw new CustomError("error_bad_request", message);
+    throw new CustomError("error_unprocessable_entity", message);
   }
 
   return next();
@@ -58,6 +73,14 @@ export async function validateCardBlockUnblock(
   next: NextFunction
 ) {
   const { password } = req.body;
+  const { cardId } = req.params;
+
+  if (!cardId.match(/^\d+$/)) {
+    throw new CustomError(
+      "error_unprocessable_entity",
+      "Card Id must be a number"
+    );
+  }
 
   if (!password) {
     throw new CustomError("error_bad_request", "Password missing");
@@ -69,7 +92,7 @@ export async function validateCardBlockUnblock(
 
   if (error) {
     const message = error.details.map((detail) => detail.message).join("; ");
-    throw new CustomError("error_bad_request", message);
+    throw new CustomError("error_unprocessable_entity", message);
   }
 
   return next();
