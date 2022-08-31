@@ -1,19 +1,20 @@
 import { Router } from "express";
-import { createCard } from "../controllers/cardsControllers";
+import { activateCard, createCard } from "../controllers/cardsControllers";
 import {
   validateCardActivation,
-  validateReqCardCreation,
+  validateCardCreation,
 } from "../middlewares/cardsMiddleware";
 
 export const cardsRouter = Router();
 
 cardsRouter.post(
   "/employees/:employeeId/cards/:cardType/create",
-  validateReqCardCreation,
+  validateCardCreation,
   createCard
 );
 
-cardsRouter.post(
-  "/employees/:employeeId/cards/:cardId/activate",
-  validateCardActivation
+cardsRouter.patch(
+  "/cards/:cardId/activate",
+  validateCardActivation,
+  activateCard
 );

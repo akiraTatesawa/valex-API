@@ -5,7 +5,7 @@ import {
   createCardSchema,
 } from "../schemas/cardsSchemas";
 
-export async function validateReqCardCreation(
+export async function validateCardCreation(
   req: Request<{ cardType: string }>,
   res: Response,
   next: NextFunction
@@ -30,7 +30,7 @@ export async function validateReqCardCreation(
 }
 
 export async function validateCardActivation(
-  req: Request<{}, {}, { password: number; CVC: string }>,
+  req: Request<{ cardId: string }, {}, { password: string; CVC: string }>,
   res: Response,
   next: NextFunction
 ) {
@@ -40,13 +40,9 @@ export async function validateCardActivation(
     throw new CustomError("error_bad_request", "Password or CVC missing");
   }
 
-  const { error } = activationCardSchema.validate(
-    {
-      ...req.body,
-      password: password.toString(),
-    },
-    { abortEarly: false }
-  );
+  const { error } = activationCardSchema.validate(req.body, {
+    abortEarly: false,
+  });
   if (error) {
     const message = error.details.map((detail) => detail.message).join("; ");
     throw new CustomError("error_bad_request", message);

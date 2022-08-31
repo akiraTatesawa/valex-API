@@ -5,12 +5,12 @@ interface ErrorHandlerObject extends ErrorRequestHandler {
   message: string;
 }
 
-type Error = {
+type ErrorData = {
   status: number;
 };
 
-interface ErrorsType {
-  [key: string]: Error;
+interface Errors {
+  [typeofError: string]: ErrorData;
 }
 
 export async function errorHandlingMiddleware(
@@ -20,7 +20,7 @@ export async function errorHandlingMiddleware(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction
 ) {
-  const Errors: ErrorsType = {
+  const Errors: Errors = {
     error_bad_request: {
       status: 400,
     },
@@ -40,7 +40,6 @@ export async function errorHandlingMiddleware(
       status: 422,
     },
   };
-  console.log(error);
   const { message, type } = error;
 
   if (Errors[type]?.status) {

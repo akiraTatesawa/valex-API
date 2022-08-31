@@ -17,3 +17,15 @@ export async function createCard(
 
   return res.sendStatus(201);
 }
+
+export async function activateCard(
+  req: Request<{ cardId: string }, {}, { password: string; CVC: string }>,
+  res: Response
+) {
+  const { cardId } = req.params;
+  const { password, CVC } = req.body;
+
+  await CardsServices.activateCard(parseInt(cardId, 10), password, CVC);
+
+  return res.sendStatus(200);
+}
