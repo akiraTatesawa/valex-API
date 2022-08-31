@@ -3,12 +3,14 @@ import {
   activateCard,
   blockCard,
   createCard,
+  rechargeCard,
   unblockCard,
 } from "../controllers/cardsControllers";
 import {
   validateCardActivation,
   validateCardBlockUnblock,
   validateCardCreation,
+  validateCardRecharge,
 } from "../middlewares/cardsMiddleware";
 
 export const cardsRouter = Router();
@@ -32,3 +34,5 @@ cardsRouter.patch(
   validateCardBlockUnblock,
   unblockCard
 );
+
+cardsRouter.post("/cards/:cardId/recharge", validateCardRecharge, rechargeCard);

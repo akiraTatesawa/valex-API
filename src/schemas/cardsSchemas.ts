@@ -1,7 +1,6 @@
 import Joi from "joi";
 
 export const createCardSchema = Joi.object({
-  API_KEY: Joi.string().required(),
   cardType: Joi.string()
     .valid("groceries", "restaurant", "transport", "education", "health")
     .required(),
@@ -26,4 +25,8 @@ export const blockUnblockCardSchema = Joi.object({
     .pattern(/^\d+$/)
     .message(`"password" must only contain numbers`)
     .required(),
+});
+
+export const rechargeCardSchema = Joi.object({
+  amount: Joi.number().integer().greater(0).required(),
 });

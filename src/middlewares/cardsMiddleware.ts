@@ -4,7 +4,9 @@ import {
   activationCardSchema,
   blockUnblockCardSchema,
   createCardSchema,
+  rechargeCardSchema,
 } from "../schemas/cardsSchemas";
+import { API_KEYSchema } from "../schemas/headerSchema";
 
 export async function validateCardCreation(
   req: Request<{ cardType: string; employeeId: string }>,
@@ -21,13 +23,27 @@ export async function validateCardCreation(
     );
   }
 
-  const { error } = createCardSchema.validate(
-    { API_KEY, cardType },
+  const { error: bodyError } = createCardSchema.validate(
+    { cardType },
     { abortEarly: false }
   );
 
-  if (error) {
-    const message = error.details.map((detail) => detail.message).join("; ");
+  const { error: headerError } = API_KEYSchema.validate(
+    { API_KEY },
+    { abortEarly: false }
+  );
+
+  if (bodyError) {
+    const message = bodyError.details
+      .map((detail) => detail.message)
+      .join("; ");
+    throw new CustomError("error_unprocessable_entity", message);
+  }
+
+  if (headerError) {
+    const message = headerError.details
+      .map((detail) => detail.message)
+      .join("; ");
     throw new CustomError("error_unprocessable_entity", message);
   }
 
@@ -94,6 +110,47 @@ export async function validateCardBlockUnblock(
     const message = error.details.map((detail) => detail.message).join("; ");
     throw new CustomError("error_unprocessable_entity", message);
   }
+
+  return next();
+}
+
+export async function validateCardRecharge(
+  req: Request<{ cardId: string }, {}, { amount: number }>,
+  res: Response,
+  next: NextFunction
+) {
+  const { "x-api-key": API_KEY } = req.headers;
+  const { cardId } = req.params;
+
+  if (!cardId.match(/^\d+$/)) {
+    throw new CustomError(
+      "error_unprocessable_entity",
+      "Card Id must be a number"
+    );
+  }
+  const { error: bodyError } = rechargeCardSchema.validate(req.body, {
+    abortEarly: false,
+  });
+  const { error: headerError } = API_KEYSchema.validate(
+    { API_KEY },
+    { abortEarly: false }
+  );
+
+  if (bodyError) {
+    const message = bodyError.details
+      .map((detail) => detail.message)
+      .join("; ");
+    throw new CustomError("error_unprocessable_entity", message);
+  }
+
+  if (headerError) {
+    const message = headerError.details
+      .map((detail) => detail.message)
+      .join("; ");
+    throw new CustomError("error_unprocessable_entity", message);
+  }
+
+  res.locals.API_KEY = API_KEY;
 
   return next();
 }
