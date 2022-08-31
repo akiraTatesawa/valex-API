@@ -28,6 +28,8 @@
         "prettier/prettier": "error",
         "@typescript-eslint/comma-dangle": "off",
         "operator-linebreak": "off",
+        "object-curly-newline": "off",
+        "@typescript-eslint/no-throw-literal": "off",
 
         
         "@typescript-eslint/quotes": "off",
