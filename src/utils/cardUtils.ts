@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export function setCardholderName(employeeName: string): string {
   const employeeNameArray: string[] = employeeName.split(" ");
   const cardholderNameArray: string[] = [];
@@ -13,4 +15,13 @@ export function setCardholderName(employeeName: string): string {
   });
 
   return cardholderNameArray.join(" ");
+}
+
+export function setIsExpired(expirationDate: string) {
+  const formattedExpirationDate = expirationDate.replace("/", "-01-");
+
+  if (dayjs().isAfter(dayjs(formattedExpirationDate))) {
+    return true;
+  }
+  return false;
 }

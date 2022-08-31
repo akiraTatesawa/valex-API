@@ -5,6 +5,7 @@ import * as CardUtils from "../utils/cardUtils";
 import { CustomError } from "../classes/CustomError";
 import { Card } from "../classes/Card";
 import { TransactionTypes } from "../types/cardTypes";
+import { decryptData, encryptData } from "../utils/cryptDataUtils";
 
 export async function createNewCard(
   API_KEY: string,
@@ -36,4 +37,28 @@ export async function createNewCard(
   const card = new Card(employeeId, cardType, cardholderName);
 
   await CardRepository.insert(card);
+}
+
+export async function activateCard(
+  cardId: number,
+  password: string,
+  CVC: string
+) {
+  const card = await CardRepository.findById(cardId);
+
+  if (!card) {
+    throw new CustomError("error_not_found", "Card not found");
+  }
+  if (card?.password) {
+    throw new CustomError("error_conflict", "This card is already activated");
+  }
+  if (CardUtils.setIsExpired(card.expirationDate)) {
+    throw new CustomError("error_bad_request", "This card is expired");
+  }
+  if (decryptData(card.securityCode) !== CVC) {
+    throw new CustomError("error_unauthorized", "Wrong card security code");
+  }
+
+  const encryptedPassword = encryptData(password);
+  await CardRepository.update(cardId, { password: encryptedPassword });
 }
