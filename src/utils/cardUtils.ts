@@ -1,4 +1,6 @@
 import dayjs from "dayjs";
+import { Recharge } from "../interfaces/rechargeInterfaces";
+import { PaymentWithBusinessName } from "../repositories/paymentRepository";
 
 export function setCardholderName(employeeName: string): string {
   const employeeNameArray: string[] = employeeName.split(" ");
@@ -24,4 +26,15 @@ export function setIsExpired(expirationDate: string) {
     return true;
   }
   return false;
+}
+
+export function calcBalance(
+  recharges: Recharge[],
+  transactions: PaymentWithBusinessName[]
+) {
+  const balance =
+    recharges.reduce((prev, curr) => prev + curr.amount, 0) -
+    transactions.reduce((prev, curr) => prev + curr.amount, 0);
+
+  return balance;
 }
