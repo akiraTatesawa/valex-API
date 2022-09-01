@@ -2,6 +2,7 @@ import * as CompanyRepository from "../repositories/companyRepository";
 import * as EmployeeRepository from "../repositories/employeeRepository";
 import * as CardRepository from "../repositories/cardRepository";
 import * as RechargeRepository from "../repositories/rechargeRepository";
+import * as PaymentRepository from "../repositories/paymentRepository";
 import * as CardUtils from "../utils/cardUtils";
 import { CustomError } from "../classes/CustomError";
 import { Card } from "../classes/Card";
@@ -131,4 +132,20 @@ export async function rechargeCard(
   }
 
   await RechargeRepository.insert({ cardId, amount });
+}
+
+export async function getCardBalance(cardId: number) {
+  const card = await CardRepository.findById(cardId);
+  if (!card) {
+    throw new CustomError("error_not_found", "Card not found");
+  }
+
+  const recharges = await RechargeRepository.findByCardId(cardId);
+  const transactions = await PaymentRepository.findByCardId(cardId);
+
+  const balance =
+    recharges.reduce((prev, curr) => prev + curr.amount, 0) +
+    transactions.reduce((prev, curr) => prev + curr.amount, 0);
+
+  return { balance, transactions, recharges };
 }

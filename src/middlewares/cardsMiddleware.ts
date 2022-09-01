@@ -154,3 +154,20 @@ export async function validateCardRecharge(
 
   return next();
 }
+
+export async function validateCardBalance(
+  req: Request<{ cardId: string }>,
+  res: Response,
+  next: NextFunction
+) {
+  const { cardId } = req.params;
+
+  if (!cardId.match(/^\d+$/)) {
+    throw new CustomError(
+      "error_unprocessable_entity",
+      "Card Id must be a number"
+    );
+  }
+
+  return next();
+}
