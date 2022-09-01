@@ -61,6 +61,11 @@ const checkIfCardIsAlreadyBlocked = (isBlocked: boolean) => {
     throw new CustomError("error_bad_request", "This card is already blocked");
   }
 };
+const checkIfCardIsAlreadyUnblocked = (isBlocked: boolean) => {
+  if (!isBlocked) {
+    throw new CustomError("error_bad_request", "This card is not blocked");
+  }
+};
 const checkIfPasswordIsWrong = (
   cardPassword: string | undefined,
   reqPassword: string
@@ -124,21 +129,11 @@ export async function blockCard(cardId: number, password: string) {
 export async function unblockCard(cardId: number, password: string) {
   const card = await CardRepository.findById(cardId);
 
-  if (!card) {
-    throw new CustomError("error_not_found", "Card not found");
-  }
-  if (!card?.password) {
-    throw new CustomError("error_bad_request", "This card is not activated");
-  }
-  if (CardUtils.setIsExpired(card.expirationDate)) {
-    throw new CustomError("error_bad_request", "This card is expired");
-  }
-  if (!card.isBlocked) {
-    throw new CustomError("error_bad_request", "This card is not blocked");
-  }
-  if (CryptDataUtils.decryptData(card.password) !== password) {
-    throw new CustomError("error_unauthorized", "Wrong password");
-  }
+  checkIfCardDoesNotExist(card);
+  checkIfCardIsNotActivated(card?.password);
+  checkIfCardIsExpired(card.expirationDate);
+  checkIfCardIsAlreadyUnblocked(card.isBlocked);
+  checkIfPasswordIsWrong(card?.password, password);
 
   await CardRepository.update(cardId, { isBlocked: false });
 }
