@@ -5,7 +5,7 @@ import * as CardMiddlewares from "../middlewares/cardsMiddleware";
 export const cardsRouter = Router();
 
 cardsRouter.post(
-  "/employees/:employeeId/cards/:cardType/create",
+  "/cards/create",
   CardMiddlewares.validateCardCreation,
   CardControllers.createCard
 );

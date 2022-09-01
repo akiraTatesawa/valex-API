@@ -9,26 +9,18 @@ import {
   rechargeCardSchema,
 } from "../schemas/cardsSchemas";
 import { API_KEYSchema } from "../schemas/headerSchema";
+import { TransactionTypes } from "../types/cardTypes";
 
 export async function validateCardCreation(
-  req: Request<{ cardType: string; employeeId: string }>,
+  req: Request<{}, {}, { cardType: TransactionTypes; employeeId: number }>,
   res: Response,
   next: NextFunction
 ) {
-  const { cardType, employeeId } = req.params;
   const { "x-api-key": API_KEY } = req.headers;
 
-  if (!employeeId.match(/^\d+$/)) {
-    throw new CustomError(
-      "error_unprocessable_entity",
-      "Employee Id must be a number"
-    );
-  }
-
-  const { error: bodyError } = createCardSchema.validate(
-    { cardType },
-    { abortEarly: false }
-  );
+  const { error: bodyError } = createCardSchema.validate(req.body, {
+    abortEarly: false,
+  });
 
   const { error: headerError } = API_KEYSchema.validate(
     { API_KEY },
@@ -49,7 +41,6 @@ export async function validateCardCreation(
     throw new CustomError("error_unprocessable_entity", message);
   }
 
-  res.locals.cardType = cardType;
   res.locals.API_KEY = API_KEY;
 
   return next();
