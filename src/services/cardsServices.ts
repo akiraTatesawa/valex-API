@@ -5,10 +5,31 @@ import * as RechargeRepository from "../repositories/rechargeRepository";
 import * as PaymentRepository from "../repositories/paymentRepository";
 import * as BusinessRepository from "../repositories/businessRepository";
 import * as CardUtils from "../utils/cardUtils";
+import * as CryptDataUtils from "../utils/cryptDataUtils";
 import { CustomError } from "../classes/CustomError";
 import { Card } from "../classes/Card";
 import { TransactionTypes } from "../types/cardTypes";
-import { decryptData, encryptData } from "../utils/cryptDataUtils";
+import { Card as ICard } from "../interfaces/cardInterfaces";
+import { Company } from "../interfaces/companyInterfaces";
+import { Employee } from "../interfaces/employeeInterfaces";
+
+const checkIfCompanyDoesNotExist = (company: Company) => {
+  if (!company) throw new CustomError("error_not_found", "Company not found");
+};
+const checkIfEmployeeDoesNotExist = (employee: Employee) => {
+  if (!employee) throw new CustomError("error_not_found", "Employee not found");
+};
+const checkIfEmployeeAlreadyHasTheCard = (card: ICard, cardType: string) => {
+  if (card) {
+    throw new CustomError(
+      "error_conflict",
+      `The employee already has a ${cardType} card`
+    );
+  }
+};
+const checkIfCardDoesNotExist = (card: ICard) => {
+  if (!card) throw new CustomError("error_not_found", "Card not found");
+};
 
 export async function createNewCard(
   API_KEY: string,
@@ -16,25 +37,17 @@ export async function createNewCard(
   cardType: TransactionTypes
 ) {
   const company = await CompanyRepository.findByApiKey(API_KEY);
-  if (!company) {
-    throw new CustomError("error_not_found", "Company not found");
-  }
+  checkIfCompanyDoesNotExist(company);
 
   const employee = await EmployeeRepository.findById(employeeId);
-  if (!employee) {
-    throw new CustomError("error_not_found", "Employee not found");
-  }
+  checkIfEmployeeDoesNotExist(employee);
 
   const existingCard = await CardRepository.findByTypeAndEmployeeId(
     cardType,
     employeeId
   );
-  if (existingCard) {
-    throw new CustomError(
-      "error_conflict",
-      `The employee already has a ${cardType} card`
-    );
-  }
+  checkIfEmployeeAlreadyHasTheCard(existingCard, cardType);
+
   const cardholderName = CardUtils.setCardholderName(employee.fullName);
 
   const card = new Card(employeeId, cardType, cardholderName);
@@ -51,6 +64,7 @@ export async function activateCard(
   if (!card) {
     throw new CustomError("error_not_found", "Card not found");
   }
+
   if (card?.password) {
     throw new CustomError(
       "error_bad_request",
@@ -60,11 +74,11 @@ export async function activateCard(
   if (CardUtils.setIsExpired(card.expirationDate)) {
     throw new CustomError("error_bad_request", "This card is expired");
   }
-  if (decryptData(card.securityCode) !== CVC) {
+  if (CryptDataUtils.decryptData(card.securityCode) !== CVC) {
     throw new CustomError("error_unauthorized", "Wrong card security code");
   }
 
-  const encryptedPassword = encryptData(password);
+  const encryptedPassword = CryptDataUtils.encryptData(password);
   await CardRepository.update(cardId, { password: encryptedPassword });
 }
 export async function blockCard(cardId: number, password: string) {
@@ -82,7 +96,7 @@ export async function blockCard(cardId: number, password: string) {
   if (card.isBlocked) {
     throw new CustomError("error_bad_request", "This card is already blocked");
   }
-  if (decryptData(card.password) !== password) {
+  if (CryptDataUtils.decryptData(card.password) !== password) {
     throw new CustomError("error_unauthorized", "Wrong password");
   }
 
@@ -104,7 +118,7 @@ export async function unblockCard(cardId: number, password: string) {
   if (!card.isBlocked) {
     throw new CustomError("error_bad_request", "This card is not blocked");
   }
-  if (decryptData(card.password) !== password) {
+  if (CryptDataUtils.decryptData(card.password) !== password) {
     throw new CustomError("error_unauthorized", "Wrong password");
   }
 
@@ -170,7 +184,7 @@ export async function buyFromBusiness(
   if (card.isBlocked) {
     throw new CustomError("error_bad_request", "This card is blocked");
   }
-  if (decryptData(card.password) !== password) {
+  if (CryptDataUtils.decryptData(card.password) !== password) {
     throw new CustomError("error_unauthorized", "Wrong password");
   }
   // Check business
