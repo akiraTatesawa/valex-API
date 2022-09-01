@@ -3,11 +3,13 @@ import {
   activateCard,
   blockCard,
   createCard,
+  getCardBalance,
   rechargeCard,
   unblockCard,
 } from "../controllers/cardsControllers";
 import {
   validateCardActivation,
+  validateCardBalance,
   validateCardBlockUnblock,
   validateCardCreation,
   validateCardRecharge,
@@ -36,3 +38,5 @@ cardsRouter.patch(
 );
 
 cardsRouter.post("/cards/:cardId/recharge", validateCardRecharge, rechargeCard);
+
+cardsRouter.get("/cards/:cardId/balance", validateCardBalance, getCardBalance);

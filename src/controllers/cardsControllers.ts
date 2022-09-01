@@ -66,3 +66,14 @@ export async function rechargeCard(
 
   return res.sendStatus(201);
 }
+
+export async function getCardBalance(
+  req: Request<{ cardId: string }>,
+  res: Response
+) {
+  const { cardId } = req.params;
+
+  const cardBalance = await CardsServices.getCardBalance(parseInt(cardId, 10));
+
+  return res.send(cardBalance);
+}
