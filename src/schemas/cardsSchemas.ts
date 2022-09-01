@@ -4,6 +4,7 @@ export const createCardSchema = Joi.object({
   cardType: Joi.string()
     .valid("groceries", "restaurant", "transport", "education", "health")
     .required(),
+  employeeId: Joi.number().integer().required(),
 });
 
 export const activationCardSchema = Joi.object({

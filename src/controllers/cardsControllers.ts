@@ -4,17 +4,13 @@ import * as CardsServices from "../services/cardsServices";
 import { TransactionTypes } from "../types/cardTypes";
 
 export async function createCard(
-  req: Request<{ employeeId: string; cardType: TransactionTypes }>,
+  req: Request<{}, {}, { cardType: TransactionTypes; employeeId: number }>,
   res: Response
 ) {
-  const { employeeId, cardType } = req.params;
+  const { employeeId, cardType } = req.body;
   const { API_KEY } = res.locals;
 
-  await CardsServices.createNewCard(
-    API_KEY,
-    parseInt(employeeId, 10),
-    cardType
-  );
+  await CardsServices.createNewCard(API_KEY, employeeId, cardType);
 
   return res.sendStatus(201);
 }
