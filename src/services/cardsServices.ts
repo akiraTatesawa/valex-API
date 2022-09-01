@@ -3,6 +3,7 @@ import * as EmployeeRepository from "../repositories/employeeRepository";
 import * as CardRepository from "../repositories/cardRepository";
 import * as RechargeRepository from "../repositories/rechargeRepository";
 import * as PaymentRepository from "../repositories/paymentRepository";
+import * as BusinessRepository from "../repositories/businessRepository";
 import * as CardUtils from "../utils/cardUtils";
 import { CustomError } from "../classes/CustomError";
 import { Card } from "../classes/Card";
@@ -144,8 +145,56 @@ export async function getCardBalance(cardId: number) {
   const transactions = await PaymentRepository.findByCardId(cardId);
 
   const balance =
-    recharges.reduce((prev, curr) => prev + curr.amount, 0) +
+    recharges.reduce((prev, curr) => prev + curr.amount, 0) -
     transactions.reduce((prev, curr) => prev + curr.amount, 0);
 
   return { balance, transactions, recharges };
+}
+
+export async function buyFromBusiness(
+  cardId: number,
+  password: string,
+  businessId: number,
+  amount: number
+) {
+  const card = await CardRepository.findById(cardId);
+  if (!card) {
+    throw new CustomError("error_not_found", "Card not found");
+  }
+  if (!card?.password) {
+    throw new CustomError("error_bad_request", "This card is not activated");
+  }
+  if (CardUtils.setIsExpired(card.expirationDate)) {
+    throw new CustomError("error_bad_request", "This card is expired");
+  }
+  if (card.isBlocked) {
+    throw new CustomError("error_bad_request", "This card is blocked");
+  }
+  if (decryptData(card.password) !== password) {
+    throw new CustomError("error_unauthorized", "Wrong password");
+  }
+  // Check business
+  const business = await BusinessRepository.findById(businessId);
+  if (!business) {
+    throw new CustomError("error_not_found", "Business not found");
+  }
+  if (business.type !== card.type) {
+    throw new CustomError(
+      "error_bad_request",
+      "The business type does not match the card type"
+    );
+  }
+
+  // Check balance
+  const recharges = await RechargeRepository.findByCardId(cardId);
+  const transactions = await PaymentRepository.findByCardId(cardId);
+  const balance =
+    recharges.reduce((prev, curr) => prev + curr.amount, 0) -
+    transactions.reduce((prev, curr) => prev + curr.amount, 0);
+
+  if (balance < amount) {
+    throw new CustomError("error_bad_request", "Insufficient card balance");
+  }
+
+  await PaymentRepository.insert({ cardId, amount, businessId });
 }

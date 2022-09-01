@@ -34,7 +34,11 @@ cardsRouter.post(
   CardControllers.rechargeCard
 );
 
-cardsRouter.post("/cards/:cardId/payment", CardMiddlewares.validateCardPayment);
+cardsRouter.post(
+  "/cards/:cardId/payment",
+  CardMiddlewares.validateCardPayment,
+  CardControllers.payCard
+);
 
 cardsRouter.get(
   "/cards/:cardId/balance",
