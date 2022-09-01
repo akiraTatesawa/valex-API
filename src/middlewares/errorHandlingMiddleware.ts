@@ -1,7 +1,8 @@
 import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
+import { ErrorType } from "../types/errorTypes";
 
 interface ErrorHandlerObject extends ErrorRequestHandler {
-  type: string;
+  type: ErrorType;
   message: string;
 }
 
