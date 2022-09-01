@@ -185,7 +185,6 @@ export async function buyFromBusiness(
     );
   }
 
-  // Check balance
   const recharges = await RechargeRepository.findByCardId(cardId);
   const transactions = await PaymentRepository.findByCardId(cardId);
   const balance =

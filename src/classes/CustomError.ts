@@ -1,9 +1,11 @@
+import { ErrorType } from "../types/errorTypes";
+
 export class CustomError {
-  type: string;
+  type: ErrorType;
 
   message: string;
 
-  constructor(errorType: string, message: string) {
+  constructor(errorType: ErrorType, message: string) {
     this.type = errorType;
     this.message = message;
   }
