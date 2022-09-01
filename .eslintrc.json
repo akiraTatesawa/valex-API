@@ -21,7 +21,7 @@
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
-      },
+    },
     "root": true,
     "rules": {
         "no-console": "off",
@@ -30,7 +30,8 @@
         "operator-linebreak": "off",
         "object-curly-newline": "off",
         "@typescript-eslint/no-throw-literal": "off",
-
+        "indent": "off",
+        "@typescript-eslint/indent": "warn",
         
         "@typescript-eslint/quotes": "off",
         "camelcase": "off",

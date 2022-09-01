@@ -1,42 +1,43 @@
 import { Router } from "express";
-import {
-  activateCard,
-  blockCard,
-  createCard,
-  getCardBalance,
-  rechargeCard,
-  unblockCard,
-} from "../controllers/cardsControllers";
-import {
-  validateCardActivation,
-  validateCardBalance,
-  validateCardBlockUnblock,
-  validateCardCreation,
-  validateCardRecharge,
-} from "../middlewares/cardsMiddleware";
+import * as CardControllers from "../controllers/cardsControllers";
+import * as CardMiddlewares from "../middlewares/cardsMiddleware";
 
 export const cardsRouter = Router();
 
 cardsRouter.post(
   "/employees/:employeeId/cards/:cardType/create",
-  validateCardCreation,
-  createCard
+  CardMiddlewares.validateCardCreation,
+  CardControllers.createCard
 );
 
 cardsRouter.patch(
   "/cards/:cardId/activate",
-  validateCardActivation,
-  activateCard
+  CardMiddlewares.validateCardActivation,
+  CardControllers.activateCard
 );
 
-cardsRouter.patch("/cards/:cardId/block", validateCardBlockUnblock, blockCard);
+cardsRouter.patch(
+  "/cards/:cardId/block",
+  CardMiddlewares.validateCardBlockUnblock,
+  CardControllers.blockCard
+);
 
 cardsRouter.patch(
   "/cards/:cardId/unblock",
-  validateCardBlockUnblock,
-  unblockCard
+  CardMiddlewares.validateCardBlockUnblock,
+  CardControllers.unblockCard
 );
 
-cardsRouter.post("/cards/:cardId/recharge", validateCardRecharge, rechargeCard);
+cardsRouter.post(
+  "/cards/:cardId/recharge",
+  CardMiddlewares.validateCardRecharge,
+  CardControllers.rechargeCard
+);
 
-cardsRouter.get("/cards/:cardId/balance", validateCardBalance, getCardBalance);
+cardsRouter.post("/cards/:cardId/payment", CardMiddlewares.validateCardPayment);
+
+cardsRouter.get(
+  "/cards/:cardId/balance",
+  CardMiddlewares.validateCardBalance,
+  CardControllers.getCardBalance
+);
