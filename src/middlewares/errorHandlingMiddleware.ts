@@ -40,6 +40,9 @@ export async function errorHandlingMiddleware(
     error_unprocessable_entity: {
       status: 422,
     },
+    error_internal_server_error: {
+      status: 500,
+    },
   };
   const { message, type } = error;
 
