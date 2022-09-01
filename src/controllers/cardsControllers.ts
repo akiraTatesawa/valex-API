@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/indent */
 import { Request, Response } from "express";
 import * as CardsServices from "../services/cardsServices";
 import { TransactionTypes } from "../types/cardTypes";
@@ -76,4 +77,20 @@ export async function getCardBalance(
   const cardBalance = await CardsServices.getCardBalance(parseInt(cardId, 10));
 
   return res.send(cardBalance);
+}
+
+export async function payCard(
+  req: Request<
+    { cardId: string },
+    {},
+    { password: string; businessId: number; amount: number }
+  >,
+  res: Response
+) {
+  const cardId = parseInt(req.params.cardId, 10);
+  const { password, businessId, amount } = req.body;
+
+  await CardsServices.buyFromBusiness(cardId, password, businessId, amount);
+
+  return res.sendStatus(200);
 }

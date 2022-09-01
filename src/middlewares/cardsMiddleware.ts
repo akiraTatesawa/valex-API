@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/indent */
 import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../classes/CustomError";
 import {
   activationCardSchema,
   blockUnblockCardSchema,
   createCardSchema,
+  paymentCardSchema,
   rechargeCardSchema,
 } from "../schemas/cardsSchemas";
 import { API_KEYSchema } from "../schemas/headerSchema";
@@ -157,7 +159,7 @@ export async function validateCardRecharge(
 
 export async function validateCardBalance(
   req: Request<{ cardId: string }>,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) {
   const { cardId } = req.params;
@@ -167,6 +169,34 @@ export async function validateCardBalance(
       "error_unprocessable_entity",
       "Card Id must be a number"
     );
+  }
+
+  return next();
+}
+
+export async function validateCardPayment(
+  req: Request<
+    { cardId: string },
+    {},
+    { password: string; businessId: number; amount: number }
+  >,
+  _res: Response,
+  next: NextFunction
+) {
+  const { cardId } = req.params;
+
+  if (!cardId.match(/^\d+$/)) {
+    throw new CustomError(
+      "error_unprocessable_entity",
+      "Card Id must be a number"
+    );
+  }
+
+  const { error } = paymentCardSchema.validate(req.body, { abortEarly: false });
+
+  if (error) {
+    const message = error.details.map((detail) => detail.message).join("; ");
+    throw new CustomError("error_unprocessable_entity", message);
   }
 
   return next();
