@@ -30,6 +30,27 @@ const checkIfEmployeeAlreadyHasTheCard = (card: ICard, cardType: string) => {
 const checkIfCardDoesNotExist = (card: ICard) => {
   if (!card) throw new CustomError("error_not_found", "Card not found");
 };
+const checkIfCardIsAlreadyActivated = (password: string | undefined) => {
+  if (password) {
+    throw new CustomError(
+      "error_bad_request",
+      "This card is already activated"
+    );
+  }
+};
+const checkIfCardIsExpired = (expirationDate: string) => {
+  if (CardUtils.setIsExpired(expirationDate)) {
+    throw new CustomError("error_bad_request", "This card is expired");
+  }
+};
+const checkIfSecurityCodeIsWrong = (
+  cardSecurityCode: string,
+  reqCVC: string
+) => {
+  if (CryptDataUtils.decryptData(cardSecurityCode) !== reqCVC) {
+    throw new CustomError("error_unauthorized", "Wrong card security code");
+  }
+};
 
 export async function createNewCard(
   API_KEY: string,
@@ -49,9 +70,7 @@ export async function createNewCard(
   checkIfEmployeeAlreadyHasTheCard(existingCard, cardType);
 
   const cardholderName = CardUtils.setCardholderName(employee.fullName);
-
   const card = new Card(employeeId, cardType, cardholderName);
-
   await CardRepository.insert(card);
 }
 
@@ -61,26 +80,15 @@ export async function activateCard(
   CVC: string
 ) {
   const card = await CardRepository.findById(cardId);
-  if (!card) {
-    throw new CustomError("error_not_found", "Card not found");
-  }
-
-  if (card?.password) {
-    throw new CustomError(
-      "error_bad_request",
-      "This card is already activated"
-    );
-  }
-  if (CardUtils.setIsExpired(card.expirationDate)) {
-    throw new CustomError("error_bad_request", "This card is expired");
-  }
-  if (CryptDataUtils.decryptData(card.securityCode) !== CVC) {
-    throw new CustomError("error_unauthorized", "Wrong card security code");
-  }
+  checkIfCardDoesNotExist(card);
+  checkIfCardIsAlreadyActivated(card?.password);
+  checkIfCardIsExpired(card.expirationDate);
+  checkIfSecurityCodeIsWrong(card.securityCode, CVC);
 
   const encryptedPassword = CryptDataUtils.encryptData(password);
   await CardRepository.update(cardId, { password: encryptedPassword });
 }
+
 export async function blockCard(cardId: number, password: string) {
   const card = await CardRepository.findById(cardId);
 
