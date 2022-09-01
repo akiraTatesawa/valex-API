@@ -1,13 +1,6 @@
 /* eslint-disable @typescript-eslint/indent */
 import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../classes/CustomError";
-import {
-  activationCardSchema,
-  blockUnblockCardSchema,
-  createCardSchema,
-  paymentCardSchema,
-  rechargeCardSchema,
-} from "../schemas/cardsSchemas";
 import { API_KEYSchema } from "../schemas/headerSchema";
 import { TransactionTypes } from "../types/cardTypes";
 
@@ -18,21 +11,10 @@ export async function validateCardCreation(
 ) {
   const { "x-api-key": API_KEY } = req.headers;
 
-  const { error: bodyError } = createCardSchema.validate(req.body, {
-    abortEarly: false,
-  });
-
   const { error: headerError } = API_KEYSchema.validate(
     { API_KEY },
     { abortEarly: false }
   );
-
-  if (bodyError) {
-    const message = bodyError.details
-      .map((detail) => detail.message)
-      .join("; ");
-    throw new CustomError("error_unprocessable_entity", message);
-  }
 
   if (headerError) {
     const message = headerError.details
@@ -54,25 +36,16 @@ export async function validateCardActivation(
   const { password, CVC } = req.body;
   const { cardId } = req.params;
 
+  if (!password || !CVC) {
+    throw new CustomError("error_bad_request", "Password or CVC missing");
+  }
+
   if (!cardId.match(/^\d+$/)) {
     throw new CustomError(
       "error_unprocessable_entity",
       "Card Id must be a number"
     );
   }
-
-  if (!password || !CVC) {
-    throw new CustomError("error_bad_request", "Password or CVC missing");
-  }
-
-  const { error } = activationCardSchema.validate(req.body, {
-    abortEarly: false,
-  });
-  if (error) {
-    const message = error.details.map((detail) => detail.message).join("; ");
-    throw new CustomError("error_unprocessable_entity", message);
-  }
-
   return next();
 }
 
@@ -95,15 +68,6 @@ export async function validateCardBlockUnblock(
     throw new CustomError("error_bad_request", "Password missing");
   }
 
-  const { error } = blockUnblockCardSchema.validate(req.body, {
-    abortEarly: false,
-  });
-
-  if (error) {
-    const message = error.details.map((detail) => detail.message).join("; ");
-    throw new CustomError("error_unprocessable_entity", message);
-  }
-
   return next();
 }
 
@@ -121,20 +85,11 @@ export async function validateCardRecharge(
       "Card Id must be a number"
     );
   }
-  const { error: bodyError } = rechargeCardSchema.validate(req.body, {
-    abortEarly: false,
-  });
+
   const { error: headerError } = API_KEYSchema.validate(
     { API_KEY },
     { abortEarly: false }
   );
-
-  if (bodyError) {
-    const message = bodyError.details
-      .map((detail) => detail.message)
-      .join("; ");
-    throw new CustomError("error_unprocessable_entity", message);
-  }
 
   if (headerError) {
     const message = headerError.details
@@ -181,13 +136,6 @@ export async function validateCardPayment(
       "error_unprocessable_entity",
       "Card Id must be a number"
     );
-  }
-
-  const { error } = paymentCardSchema.validate(req.body, { abortEarly: false });
-
-  if (error) {
-    const message = error.details.map((detail) => detail.message).join("; ");
-    throw new CustomError("error_unprocessable_entity", message);
   }
 
   return next();
