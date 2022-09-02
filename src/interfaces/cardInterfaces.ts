@@ -1,7 +1,6 @@
 import { TransactionTypes } from "../types/cardTypes";
 
-export interface Card {
-  id: number;
+export interface NewCard {
   employeeId: number;
   number: string;
   cardholderName: string;
@@ -12,4 +11,8 @@ export interface Card {
   originalCardId?: number;
   isBlocked: boolean;
   type: TransactionTypes;
+}
+
+export interface Card extends NewCard {
+  id: number;
 }

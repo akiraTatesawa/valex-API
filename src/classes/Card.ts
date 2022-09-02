@@ -1,10 +1,11 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
+import { NewCard as CardInterface } from "../interfaces/cardInterfaces";
 import { TransactionTypes } from "../types/cardTypes";
 import { encryptData } from "../utils/cryptDataUtils";
 
-export class Card {
+export class Card implements CardInterface {
   employeeId: number;
 
   type: TransactionTypes;

@@ -1,6 +1,7 @@
 import { ErrorType } from "../types/errorTypes";
+import { CustomError as CustomErrorInterface } from "../interfaces/customErrorInterface";
 
-export class CustomError {
+export class CustomError implements CustomErrorInterface {
   type: ErrorType;
 
   message: string;

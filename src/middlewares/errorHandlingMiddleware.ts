@@ -10,7 +10,7 @@ type ErrorData = {
   status: number;
 };
 
-interface Errors {
+interface ErrorsInterface {
   [typeofError: string]: ErrorData;
 }
 
@@ -21,7 +21,7 @@ export async function errorHandlingMiddleware(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction
 ) {
-  const Errors: Errors = {
+  const Errors: ErrorsInterface = {
     error_bad_request: {
       status: 400,
     },
