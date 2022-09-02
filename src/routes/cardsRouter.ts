@@ -8,7 +8,7 @@ export const cardsRouter = Router();
 cardsRouter.post(
   "/cards/create",
   SchemaValidatorMiddleware.validateBody("create"),
-  CardMiddlewares.validateCardCreation,
+  CardMiddlewares.validateApiKey,
   CardControllers.createCard
 );
 
@@ -40,7 +40,7 @@ cardsRouter.post(
   "/cards/:cardId/recharge",
   SchemaValidatorMiddleware.validateBody("recharge"),
   CardMiddlewares.validateCardId,
-  CardMiddlewares.validateCardRecharge,
+  CardMiddlewares.validateApiKey,
   CardControllers.rechargeCard
 );
 

@@ -2,10 +2,9 @@
 import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../classes/CustomError";
 import { API_KEYSchema } from "../schemas/headerSchema";
-import { TransactionTypes } from "../types/cardTypes";
 
-export async function validateCardCreation(
-  req: Request<{}, {}, { cardType: TransactionTypes; employeeId: number }>,
+export async function validateApiKey(
+  req: Request,
   res: Response,
   next: NextFunction
 ) {
@@ -56,29 +55,6 @@ export async function validateCardBlockUnblock(
   return next();
 }
 
-export async function validateCardRecharge(
-  req: Request<{ cardId: string }, {}, { amount: number }>,
-  res: Response,
-  next: NextFunction
-) {
-  const { "x-api-key": API_KEY } = req.headers;
-
-  const { error: headerError } = API_KEYSchema.validate(
-    { API_KEY },
-    { abortEarly: false }
-  );
-
-  if (headerError) {
-    const message = headerError.details
-      .map((detail) => detail.message)
-      .join("; ");
-    throw new CustomError("error_unprocessable_entity", message);
-  }
-
-  res.locals.API_KEY = API_KEY;
-
-  return next();
-}
 export async function validateCardId(
   req: Request<{ cardId: string }>,
   _res: Response,
