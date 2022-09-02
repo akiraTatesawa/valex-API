@@ -75,7 +75,7 @@ export async function getCardBalance(
   return res.send(cardBalance);
 }
 
-export async function payCard(
+export async function buyFromBusiness(
   req: Request<
     { cardId: string },
     {},

@@ -34,18 +34,11 @@ export async function validateCardActivation(
   next: NextFunction
 ) {
   const { password, CVC } = req.body;
-  const { cardId } = req.params;
 
   if (!password || !CVC) {
     throw new CustomError("error_bad_request", "Password or CVC missing");
   }
 
-  if (!cardId.match(/^\d+$/)) {
-    throw new CustomError(
-      "error_unprocessable_entity",
-      "Card Id must be a number"
-    );
-  }
   return next();
 }
 
@@ -55,14 +48,6 @@ export async function validateCardBlockUnblock(
   next: NextFunction
 ) {
   const { password } = req.body;
-  const { cardId } = req.params;
-
-  if (!cardId.match(/^\d+$/)) {
-    throw new CustomError(
-      "error_unprocessable_entity",
-      "Card Id must be a number"
-    );
-  }
 
   if (!password) {
     throw new CustomError("error_bad_request", "Password missing");
@@ -77,14 +62,6 @@ export async function validateCardRecharge(
   next: NextFunction
 ) {
   const { "x-api-key": API_KEY } = req.headers;
-  const { cardId } = req.params;
-
-  if (!cardId.match(/^\d+$/)) {
-    throw new CustomError(
-      "error_unprocessable_entity",
-      "Card Id must be a number"
-    );
-  }
 
   const { error: headerError } = API_KEYSchema.validate(
     { API_KEY },
@@ -102,30 +79,8 @@ export async function validateCardRecharge(
 
   return next();
 }
-
-export async function validateCardBalance(
+export async function validateCardId(
   req: Request<{ cardId: string }>,
-  _res: Response,
-  next: NextFunction
-) {
-  const { cardId } = req.params;
-
-  if (!cardId.match(/^\d+$/)) {
-    throw new CustomError(
-      "error_unprocessable_entity",
-      "Card Id must be a number"
-    );
-  }
-
-  return next();
-}
-
-export async function validateCardPayment(
-  req: Request<
-    { cardId: string },
-    {},
-    { password: string; businessId: number; amount: number }
-  >,
   _res: Response,
   next: NextFunction
 ) {

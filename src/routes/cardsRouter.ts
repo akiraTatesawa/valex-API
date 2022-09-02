@@ -15,6 +15,7 @@ cardsRouter.post(
 cardsRouter.patch(
   "/cards/:cardId/activate",
   SchemaValidatorMiddleware.validateBody("activation"),
+  CardMiddlewares.validateCardId,
   CardMiddlewares.validateCardActivation,
   CardControllers.activateCard
 );
@@ -22,6 +23,7 @@ cardsRouter.patch(
 cardsRouter.patch(
   "/cards/:cardId/block",
   SchemaValidatorMiddleware.validateBody("blockUnblock"),
+  CardMiddlewares.validateCardId,
   CardMiddlewares.validateCardBlockUnblock,
   CardControllers.blockCard
 );
@@ -29,6 +31,7 @@ cardsRouter.patch(
 cardsRouter.patch(
   "/cards/:cardId/unblock",
   SchemaValidatorMiddleware.validateBody("blockUnblock"),
+  CardMiddlewares.validateCardId,
   CardMiddlewares.validateCardBlockUnblock,
   CardControllers.unblockCard
 );
@@ -36,6 +39,7 @@ cardsRouter.patch(
 cardsRouter.post(
   "/cards/:cardId/recharge",
   SchemaValidatorMiddleware.validateBody("recharge"),
+  CardMiddlewares.validateCardId,
   CardMiddlewares.validateCardRecharge,
   CardControllers.rechargeCard
 );
@@ -43,12 +47,12 @@ cardsRouter.post(
 cardsRouter.post(
   "/cards/:cardId/payment",
   SchemaValidatorMiddleware.validateBody("payment"),
-  CardMiddlewares.validateCardPayment,
-  CardControllers.payCard
+  CardMiddlewares.validateCardId,
+  CardControllers.buyFromBusiness
 );
 
 cardsRouter.get(
   "/cards/:cardId/balance",
-  CardMiddlewares.validateCardBalance,
+  CardMiddlewares.validateCardId,
   CardControllers.getCardBalance
 );
