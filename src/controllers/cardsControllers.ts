@@ -95,7 +95,7 @@ export async function buyFromBusinessOnline(
   req: Request<{}, {}, OnlinePaymentData>,
   res: Response
 ) {
-  const { cardInfo, amount, businessId } = req.body;
+  await CardsServices.buyFromBusinessOnline(req.body);
 
-  return res.send({ cardInfo, amount, businessId });
+  return res.sendStatus(200);
 }

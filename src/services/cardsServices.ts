@@ -10,6 +10,7 @@ import { CustomError } from "../classes/CustomError";
 import { Card } from "../classes/Card";
 import { TransactionTypes } from "../types/cardTypes";
 import { Card as ICard } from "../interfaces/cardInterfaces";
+import { OnlinePaymentData } from "../interfaces/paymentInterfaces";
 import { Company } from "../interfaces/companyInterfaces";
 import { Employee } from "../interfaces/employeeInterfaces";
 import { Business } from "../interfaces/businessInterfaces";
@@ -124,6 +125,13 @@ async function getCardByTypeAndEmployeeId(
 }
 async function getCardById(cardId: number) {
   return CardRepository.findById(cardId);
+}
+async function getCardByDetails(
+  number: string,
+  name: string,
+  expirationDate: string
+) {
+  return CardRepository.findByCardDetails(number, name, expirationDate);
 }
 async function getRechargesByCardId(cardId: number) {
   return RechargeRepository.findByCardId(cardId);
@@ -243,4 +251,30 @@ export async function buyFromBusiness(
   ensureSufficientCardBalance(balance, amount);
 
   await PaymentRepository.insert({ cardId, amount, businessId });
+}
+
+export async function buyFromBusinessOnline(paymentData: OnlinePaymentData) {
+  const { cardInfo, businessId, amount } = paymentData;
+  const card = await getCardByDetails(
+    cardInfo.cardNumber,
+    cardInfo.cardholderName,
+    cardInfo.expirationDate
+  );
+
+  ensureCardExists(card);
+  ensureCardIsActivated(card?.password);
+  ensureCardIsNotExpired(card.expirationDate);
+  ensureCardIsNotBlocked(card.isBlocked);
+  ensureSecurityCodeIsCorrect(card.securityCode, cardInfo.CVC);
+
+  const business = await getBusinessById(businessId);
+  ensureBusinessExists(business);
+  ensureBusinessTypeIsEqualToCardType(business.type, card.type);
+
+  const recharges = await getRechargesByCardId(card.id);
+  const transactions = await getPaymentsByCardId(card.id);
+  const balance = CardUtils.calcBalance(recharges, transactions);
+  ensureSufficientCardBalance(balance, amount);
+
+  await PaymentRepository.insert({ cardId: card.id, amount, businessId });
 }

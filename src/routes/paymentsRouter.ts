@@ -12,5 +12,6 @@ paymentsRouter.post(
 
 paymentsRouter.post(
   "/payments/online",
-  SchemaValidatorMiddleware.validateBody("paymentOnline")
+  SchemaValidatorMiddleware.validateBody("paymentOnline"),
+  CardControllers.buyFromBusinessOnline
 );
