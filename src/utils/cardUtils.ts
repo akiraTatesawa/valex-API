@@ -19,7 +19,7 @@ export function setCardholderName(employeeName: string): string {
   return cardholderNameArray.join(" ");
 }
 
-export function setIsExpired(expirationDate: string) {
+export function setIsExpired(expirationDate: string): boolean {
   const formattedExpirationDate = expirationDate.replace("/", "-01-");
 
   if (dayjs().isAfter(dayjs(formattedExpirationDate))) {
@@ -31,7 +31,7 @@ export function setIsExpired(expirationDate: string) {
 export function calcBalance(
   recharges: Recharge[],
   transactions: PaymentWithBusinessName[]
-) {
+): number {
   const balance =
     recharges.reduce((prev, curr) => prev + curr.amount, 0) -
     transactions.reduce((prev, curr) => prev + curr.amount, 0);

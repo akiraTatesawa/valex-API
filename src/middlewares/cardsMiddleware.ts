@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/indent */
 import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../classes/CustomError";
 import { API_KEYSchema } from "../schemas/headerSchema";
