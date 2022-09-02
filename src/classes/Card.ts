@@ -6,15 +6,15 @@ import { TransactionTypes } from "../types/cardTypes";
 import { encryptData } from "../utils/cryptDataUtils";
 
 export class Card implements CardInterface {
-  employeeId: number;
+  readonly employeeId: number;
 
-  type: TransactionTypes;
+  readonly type: TransactionTypes;
 
   readonly number: string = faker.finance.creditCardNumber(
     "#### #### #### ####"
   );
 
-  cardholderName: string;
+  readonly cardholderName: string;
 
   readonly securityCode: string = encryptData(faker.finance.creditCardCVV());
 

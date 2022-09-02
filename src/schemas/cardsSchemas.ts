@@ -31,13 +31,3 @@ export const blockUnblockCardSchema = Joi.object({
 export const rechargeCardSchema = Joi.object({
   amount: Joi.number().integer().greater(0).required(),
 });
-
-export const paymentCardSchema = Joi.object({
-  password: Joi.string()
-    .length(4)
-    .pattern(/^\d+$/)
-    .message(`"password" must only contain numbers`)
-    .required(),
-  businessId: Joi.number().integer().required(),
-  amount: Joi.number().integer().greater(0).required(),
-});

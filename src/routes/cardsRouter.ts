@@ -44,13 +44,6 @@ cardsRouter.post(
   CardControllers.rechargeCard
 );
 
-cardsRouter.post(
-  "/cards/:cardId/payment",
-  SchemaValidatorMiddleware.validateBody("payment"),
-  CardMiddlewares.validateCardId,
-  CardControllers.buyFromBusiness
-);
-
 cardsRouter.get(
   "/cards/:cardId/balance",
   CardMiddlewares.validateCardId,
