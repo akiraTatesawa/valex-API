@@ -9,3 +9,9 @@ paymentsRouter.post(
   SchemaValidatorMiddleware.validateBody("paymentPOS"),
   CardControllers.buyFromBusiness
 );
+
+paymentsRouter.post(
+  "/payments/online",
+  SchemaValidatorMiddleware.validateBody("paymentOnline"),
+  CardControllers.buyFromBusinessOnline
+);

@@ -7,7 +7,10 @@ import {
   blockUnblockCardSchema as blockUnblock,
   rechargeCardSchema as recharge,
 } from "../schemas/cardsSchemas";
-import { paymentPOSSchema as paymentPOS } from "../schemas/paymentsSchemas";
+import {
+  paymentPOSSchema as paymentPOS,
+  paymentOnlineSchema as paymentOnline,
+} from "../schemas/paymentsSchemas";
 
 interface SchemasInterface {
   [schemaName: string]: ObjectSchema;
@@ -18,6 +21,7 @@ type Validator =
   | "activation"
   | "blockUnblock"
   | "paymentPOS"
+  | "paymentOnline"
   | "recharge";
 
 export function validateBody(validator: Validator) {
@@ -26,6 +30,7 @@ export function validateBody(validator: Validator) {
     activation,
     blockUnblock,
     paymentPOS,
+    paymentOnline,
     recharge,
   };
 
