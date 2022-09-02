@@ -20,7 +20,12 @@ export const paymentOnlineSchema = Joi.object({
         `"Card Number" must follow the [0-9]*4 [0-9]*4 [0-9]*4 [0-9]*4 pattern`
       )
       .required(),
-    cardholderName: Joi.string().required(),
+    cardholderName: Joi.string()
+      .pattern(/^[\p{Lu}\p{Mark}\s]+$/u)
+      .message(
+        `"Cardholder Name" must only contain uppercase letters and whitespace`
+      )
+      .required(),
     expirationDate: Joi.string()
       .length(5)
       .pattern(/^[0-9]{2}\/[0-9]{2}$/)

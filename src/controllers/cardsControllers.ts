@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/indent */
 import { Request, Response } from "express";
+import { OnlinePaymentData } from "../interfaces/paymentInterfaces";
 import * as CardsServices from "../services/cardsServices";
 import { TransactionTypes } from "../types/cardTypes";
 
@@ -88,4 +89,13 @@ export async function buyFromBusiness(
   await CardsServices.buyFromBusiness(cardId, password, businessId, amount);
 
   return res.sendStatus(200);
+}
+
+export async function buyFromBusinessOnline(
+  req: Request<{}, {}, OnlinePaymentData>,
+  res: Response
+) {
+  const { cardInfo, amount, businessId } = req.body;
+
+  return res.send({ cardInfo, amount, businessId });
 }
