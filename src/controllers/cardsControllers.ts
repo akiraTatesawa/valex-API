@@ -77,14 +77,13 @@ export async function getCardBalance(
 
 export async function buyFromBusiness(
   req: Request<
-    { cardId: string },
     {},
-    { password: string; businessId: number; amount: number }
+    {},
+    { cardId: number; password: string; businessId: number; amount: number }
   >,
   res: Response
 ) {
-  const cardId = parseInt(req.params.cardId, 10);
-  const { password, businessId, amount } = req.body;
+  const { cardId, password, businessId, amount } = req.body;
 
   await CardsServices.buyFromBusiness(cardId, password, businessId, amount);
 
