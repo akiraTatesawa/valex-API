@@ -1,7 +1,22 @@
 /* eslint-disable @typescript-eslint/indent */
 import { Request, Response } from "express";
 import { OnlinePaymentData } from "../interfaces/paymentInterfaces";
-import * as CardsServices from "../services/cardsServices";
+import { BusinessRepository } from "../repositories/businessRepository";
+import { CardRepository } from "../repositories/cardRepository";
+import { CompanyRepository } from "../repositories/companyRepository";
+import { EmployeeRepository } from "../repositories/employeeRepository";
+import { PaymentRepository } from "../repositories/paymentRepository";
+import { RechargeRepository } from "../repositories/rechargeRepository";
+import { ActivateCardService } from "../services/cardServices/activateCardService";
+import { BlockCardService } from "../services/cardServices/blockCardService";
+import * as CardsServices from "../services/cardServices/cardsServices";
+import { CardValidator } from "../services/cardServices/cardsServicesValidators";
+import { CreateCardService } from "../services/cardServices/createCardService";
+import { GetCardBalanceService } from "../services/cardServices/getCardBalanceService";
+import { RechargeCardService } from "../services/cardServices/rechargeCardService";
+import { UnblockCardService } from "../services/cardServices/unblockCardService";
+import { OnlinePaymentService } from "../services/paymentServices/onlinePaymentService";
+import { POSPaymentService } from "../services/paymentServices/posPaymentService";
 import { TransactionTypes } from "../types/cardTypes";
 
 export async function createCard(
@@ -11,7 +26,19 @@ export async function createCard(
   const { employeeId, cardType } = req.body;
   const { API_KEY } = res.locals;
 
-  const card = await CardsServices.createNewCard(API_KEY, employeeId, cardType);
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+  const companyRepository = new CompanyRepository();
+  const employeeRepository = new EmployeeRepository();
+
+  const createCardService = new CreateCardService(
+    cardValidator,
+    cardRepository,
+    companyRepository,
+    employeeRepository
+  );
+
+  const card = await createCardService.execute(API_KEY, employeeId, cardType);
 
   return res.status(201).send(card);
 }
@@ -23,7 +50,15 @@ export async function activateCard(
   const { cardId } = req.params;
   const { password, CVC } = req.body;
 
-  await CardsServices.activateCard(parseInt(cardId, 10), password, CVC);
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+
+  const activateCardService = new ActivateCardService(
+    cardValidator,
+    cardRepository
+  );
+
+  await activateCardService.execute(parseInt(cardId, 10), password, CVC);
 
   return res.sendStatus(200);
 }
@@ -35,7 +70,12 @@ export async function blockCard(
   const { cardId } = req.params;
   const { password } = req.body;
 
-  await CardsServices.blockCard(parseInt(cardId, 10), password);
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+
+  const blockCardService = new BlockCardService(cardValidator, cardRepository);
+
+  await blockCardService.execute(parseInt(cardId, 10), password);
 
   return res.sendStatus(200);
 }
@@ -47,7 +87,15 @@ export async function unblockCard(
   const { cardId } = req.params;
   const { password } = req.body;
 
-  await CardsServices.unblockCard(parseInt(cardId, 10), password);
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+
+  const unblockCardService = new UnblockCardService(
+    cardValidator,
+    cardRepository
+  );
+
+  await unblockCardService.execute(parseInt(cardId, 10), password);
 
   return res.sendStatus(200);
 }
@@ -60,7 +108,19 @@ export async function rechargeCard(
   const { amount } = req.body;
   const { API_KEY } = res.locals;
 
-  await CardsServices.rechargeCard(parseInt(cardId, 10), API_KEY, amount);
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+  const rechargeRepository = new RechargeRepository();
+  const companyRepository = new CompanyRepository();
+
+  const rechargeCardService = new RechargeCardService(
+    cardValidator,
+    cardRepository,
+    rechargeRepository,
+    companyRepository
+  );
+
+  await rechargeCardService.execute(parseInt(cardId, 10), API_KEY, amount);
 
   return res.sendStatus(201);
 }
@@ -71,12 +131,24 @@ export async function getCardBalance(
 ) {
   const { cardId } = req.params;
 
-  const cardBalance = await CardsServices.getCardBalance(parseInt(cardId, 10));
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+  const rechargeRepository = new RechargeRepository();
+  const paymentRepository = new PaymentRepository();
+
+  const getCardBalanceService = new GetCardBalanceService(
+    cardValidator,
+    cardRepository,
+    rechargeRepository,
+    paymentRepository
+  );
+
+  const cardBalance = await getCardBalanceService.execute(parseInt(cardId, 10));
 
   return res.send(cardBalance);
 }
 
-export async function buyFromBusiness(
+export async function buyFromBusinessPOS(
   req: Request<
     {},
     {},
@@ -86,7 +158,21 @@ export async function buyFromBusiness(
 ) {
   const { cardId, password, businessId, amount } = req.body;
 
-  await CardsServices.buyFromBusiness(cardId, password, businessId, amount);
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+  const businessRepository = new BusinessRepository();
+  const rechargeRepository = new RechargeRepository();
+  const paymentRepository = new PaymentRepository();
+
+  const posPaymentService = new POSPaymentService(
+    cardValidator,
+    cardRepository,
+    businessRepository,
+    rechargeRepository,
+    paymentRepository
+  );
+
+  await posPaymentService.execute(cardId, password, businessId, amount);
 
   return res.sendStatus(200);
 }
@@ -95,7 +181,21 @@ export async function buyFromBusinessOnline(
   req: Request<{}, {}, OnlinePaymentData>,
   res: Response
 ) {
-  await CardsServices.buyFromBusinessOnline(req.body);
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+  const businessRepository = new BusinessRepository();
+  const rechargeRepository = new RechargeRepository();
+  const paymentRepository = new PaymentRepository();
+
+  const onlinePaymentService = new OnlinePaymentService(
+    cardValidator,
+    cardRepository,
+    businessRepository,
+    rechargeRepository,
+    paymentRepository
+  );
+
+  await onlinePaymentService.execute(req.body);
 
   return res.sendStatus(200);
 }

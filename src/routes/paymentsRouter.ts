@@ -7,7 +7,7 @@ export const paymentsRouter = Router();
 paymentsRouter.post(
   "/payments/pos",
   SchemaValidatorMiddleware.validateBody("paymentPOS"),
-  CardControllers.buyFromBusiness
+  CardControllers.buyFromBusinessPOS
 );
 
 paymentsRouter.post(
