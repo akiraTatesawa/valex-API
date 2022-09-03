@@ -9,7 +9,7 @@ import * as CryptDataUtils from "../utils/cryptDataUtils";
 import { CustomError } from "../classes/CustomError";
 import { Card } from "../classes/Card";
 import { TransactionTypes } from "../types/cardTypes";
-import { Card as ICard } from "../interfaces/cardInterfaces";
+import { Card as ICard, ResponseCard } from "../interfaces/cardInterfaces";
 import { OnlinePaymentData } from "../interfaces/paymentInterfaces";
 import { Company } from "../interfaces/companyInterfaces";
 import { Employee } from "../interfaces/employeeInterfaces";
@@ -110,6 +110,14 @@ function ensureSufficientCardBalance(balance: number, amount: number) {
     throw new CustomError("error_bad_request", "Insufficient card balance");
   }
 }
+function ensureCardIsNotVirtual(isVirtual: boolean) {
+  if (isVirtual) {
+    throw new CustomError(
+      "error_bad_request",
+      "Cannot create virtual card from another virtual card"
+    );
+  }
+}
 
 // Repositories getters
 async function getCompanyByAPIkey(API_KEY: string) {
@@ -148,7 +156,7 @@ export async function createNewCard(
   API_KEY: string,
   employeeId: number,
   cardType: TransactionTypes
-) {
+): Promise<ResponseCard> {
   const company = await getCompanyByAPIkey(API_KEY);
   ensureCompanyExists(company);
 
@@ -160,7 +168,16 @@ export async function createNewCard(
 
   const cardholderName = CardUtils.setCardholderName(employee.fullName);
   const card = new Card(employeeId, cardType, cardholderName);
-  await CardRepository.insert(card);
+  const cardId = await CardRepository.insert(card);
+
+  return {
+    cardId,
+    number: card.number,
+    cardholderName: card.cardholderName,
+    securityCode: CryptDataUtils.decryptData(card.securityCode),
+    expirationDate: card.expirationDate,
+    type: card.type,
+  };
 }
 
 export async function activateCard(
@@ -283,30 +300,29 @@ export async function buyFromBusinessOnline(paymentData: OnlinePaymentData) {
 export async function createVirtualCard(
   originalCardId: number,
   password: string
-) {
+): Promise<ResponseCard> {
   const card = await getCardById(originalCardId);
   ensureCardExists(card);
   ensureCardIsActivated(card?.password);
   ensurePasswordIsCorrect(card?.password, password);
+  ensureCardIsNotVirtual(card.isVirtual);
 
   const virtualCard = new VirtualCard(
     card.employeeId,
     card.type,
     card.cardholderName,
     originalCardId,
-    password
+    card?.password
   );
 
-  await CardRepository.insert(virtualCard);
-
-  const { number, cardholderName, securityCode, expirationDate, type } =
-    virtualCard;
+  const cardId = await CardRepository.insert(virtualCard);
 
   return {
-    number,
-    cardholderName,
-    securityCode: CryptDataUtils.decryptData(securityCode),
-    expirationDate,
-    type,
+    cardId,
+    number: virtualCard.number,
+    cardholderName: virtualCard.cardholderName,
+    securityCode: CryptDataUtils.decryptData(virtualCard.securityCode),
+    expirationDate: virtualCard.expirationDate,
+    type: virtualCard.type,
   };
 }

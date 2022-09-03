@@ -17,7 +17,7 @@ export class VirtualCard extends Card {
     type: TransactionTypes,
     cardholderName: string,
     originalCardId: number,
-    originalCardPassword: string
+    originalCardPassword: string | undefined
   ) {
     super(employeeId, type, cardholderName);
     this.originalCardId = originalCardId;

@@ -7,6 +7,7 @@ import {
   blockUnblockCardSchema as blockUnblock,
   rechargeCardSchema as recharge,
   createVirtualCardSchema as createVirtual,
+  deleteVirtualCardSchema as deleteVirtual,
 } from "../schemas/cardsSchemas";
 import {
   paymentPOSSchema as paymentPOS,
@@ -20,6 +21,7 @@ interface SchemasInterface {
 type Validator =
   | "create"
   | "createVirtual"
+  | "deleteVirtual"
   | "activation"
   | "blockUnblock"
   | "paymentPOS"
@@ -30,6 +32,7 @@ export function validateBody(validator: Validator) {
   const Schemas: SchemasInterface = {
     create,
     createVirtual,
+    deleteVirtual,
     activation,
     blockUnblock,
     paymentPOS,

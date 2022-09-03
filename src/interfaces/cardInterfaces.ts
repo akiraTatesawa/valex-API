@@ -16,3 +16,12 @@ export interface NewCard {
 export interface Card extends NewCard {
   id: number;
 }
+
+export interface ResponseCard {
+  cardId: number;
+  number: string;
+  cardholderName: string;
+  securityCode: string;
+  expirationDate: string;
+  type: TransactionTypes;
+}

@@ -11,9 +11,9 @@ export async function createCard(
   const { employeeId, cardType } = req.body;
   const { API_KEY } = res.locals;
 
-  await CardsServices.createNewCard(API_KEY, employeeId, cardType);
+  const card = await CardsServices.createNewCard(API_KEY, employeeId, cardType);
 
-  return res.sendStatus(201);
+  return res.status(201).send(card);
 }
 
 export async function activateCard(
@@ -111,5 +111,5 @@ export async function createVirtualCard(
     password
   );
 
-  return res.send(virtualCard);
+  return res.status(201).send(virtualCard);
 }

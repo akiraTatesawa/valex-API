@@ -13,4 +13,7 @@ virtualCardsRouter.post(
 );
 
 // Delete a virtual card
-virtualCardsRouter.delete("/cards/:virtualCardId/virtual/delete");
+virtualCardsRouter.delete(
+  "/cards/virtual/delete",
+  SchemaValidatorMiddleware.validateBody("deleteVirtual")
+);
