@@ -25,8 +25,11 @@ export class OnlinePaymentService implements OnlinePayment {
     this.paymentRepository = paymentRepository;
   }
 
-  async execute(paymentData: OnlinePaymentData): Promise<void> {
-    const { cardInfo, businessId, amount } = paymentData;
+  async execute({
+    cardInfo,
+    businessId,
+    amount,
+  }: OnlinePaymentData): Promise<void> {
     const card = await this.cardRepository.findByCardDetails(
       cardInfo.cardNumber,
       cardInfo.cardholderName,
