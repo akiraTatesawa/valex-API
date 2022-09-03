@@ -7,6 +7,15 @@ export const createCardSchema = Joi.object({
   employeeId: Joi.number().integer().required(),
 });
 
+export const createVirtualCardSchema = Joi.object({
+  originalCardId: Joi.number().integer().required(),
+  password: Joi.string()
+    .length(4)
+    .pattern(/^\d+$/)
+    .message(`"password" must only contain numbers`)
+    .required(),
+});
+
 export const activationCardSchema = Joi.object({
   CVC: Joi.string()
     .length(3)
