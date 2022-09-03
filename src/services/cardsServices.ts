@@ -110,11 +110,11 @@ function ensureSufficientCardBalance(balance: number, amount: number) {
     throw new CustomError("error_bad_request", "Insufficient card balance");
   }
 }
-function ensureCardIsNotVirtual(isVirtual: boolean) {
+function ensureCardIsNotVirtual(isVirtual: boolean, service: string) {
   if (isVirtual) {
     throw new CustomError(
       "error_bad_request",
-      "Cannot create virtual card from another virtual card"
+      `The ${service} service is not available for virtual cards`
     );
   }
 }
@@ -233,6 +233,7 @@ export async function rechargeCard(
 
   const card = await getCardById(cardId);
   ensureCardExists(card);
+  ensureCardIsNotVirtual(card.isVirtual, "recharge");
   ensureCardIsActivated(card?.password);
   ensureCardIsNotExpired(card.expirationDate);
 
@@ -243,8 +244,11 @@ export async function getCardBalance(cardId: number) {
   const card = await getCardById(cardId);
   ensureCardExists(card);
 
-  const recharges = await getRechargesByCardId(cardId);
-  const transactions = await getPaymentsByCardId(cardId);
+  const id =
+    card.isVirtual && card.originalCardId ? card.originalCardId : cardId;
+
+  const recharges = await getRechargesByCardId(id);
+  const transactions = await getPaymentsByCardId(id);
 
   const balance = CardUtils.calcBalance(recharges, transactions);
 
@@ -259,6 +263,7 @@ export async function buyFromBusiness(
 ) {
   const card = await getCardById(cardId);
   ensureCardExists(card);
+  ensureCardIsNotVirtual(card.isVirtual, "POS shopping");
   ensureCardIsActivated(card?.password);
   ensureCardIsNotExpired(card.expirationDate);
   ensureCardIsNotBlocked(card.isBlocked);
@@ -294,12 +299,15 @@ export async function buyFromBusinessOnline(paymentData: OnlinePaymentData) {
   ensureBusinessExists(business);
   ensureBusinessTypeIsEqualToCardType(business.type, card.type);
 
-  const recharges = await getRechargesByCardId(card.id);
-  const transactions = await getPaymentsByCardId(card.id);
+  const cardId =
+    card.isVirtual && card.originalCardId ? card.originalCardId : card.id;
+
+  const recharges = await getRechargesByCardId(cardId);
+  const transactions = await getPaymentsByCardId(cardId);
   const balance = CardUtils.calcBalance(recharges, transactions);
   ensureSufficientCardBalance(balance, amount);
 
-  await PaymentRepository.insert({ cardId: card.id, amount, businessId });
+  await PaymentRepository.insert({ cardId, amount, businessId });
 }
 
 export async function createVirtualCard(
@@ -310,7 +318,7 @@ export async function createVirtualCard(
   ensureCardExists(card);
   ensureCardIsActivated(card?.password);
   ensurePasswordIsCorrect(card?.password, password);
-  ensureCardIsNotVirtual(card.isVirtual);
+  ensureCardIsNotVirtual(card.isVirtual, "virtual card creation");
 
   const virtualCard = new VirtualCard(
     card.employeeId,
