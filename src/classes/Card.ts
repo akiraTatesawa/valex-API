@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
@@ -11,7 +12,7 @@ export class Card implements CardInterface {
   readonly type: TransactionTypes;
 
   readonly number: string = faker.finance.creditCardNumber(
-    "#### #### #### ####"
+    "####-####-####-####"
   );
 
   readonly cardholderName: string;
@@ -22,11 +23,11 @@ export class Card implements CardInterface {
 
   readonly password: string | undefined = undefined;
 
+  readonly isBlocked: boolean = false;
+
   readonly isVirtual: boolean = false;
 
   readonly originalCardId: number | undefined = undefined;
-
-  readonly isBlocked: boolean = false;
 
   constructor(
     employeeId: number,
