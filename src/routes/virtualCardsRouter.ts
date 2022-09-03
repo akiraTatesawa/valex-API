@@ -1,6 +1,5 @@
 import { Router } from "express";
 import * as CardControllers from "../controllers/cardsControllers";
-// import * as CardMiddlewares from "../middlewares/cardsMiddleware";
 import * as SchemaValidatorMiddleware from "../middlewares/schemaMiddleware";
 
 export const virtualCardsRouter = Router();
@@ -15,5 +14,6 @@ virtualCardsRouter.post(
 // Delete a virtual card
 virtualCardsRouter.delete(
   "/cards/virtual/delete",
-  SchemaValidatorMiddleware.validateBody("deleteVirtual")
+  SchemaValidatorMiddleware.validateBody("deleteVirtual"),
+  CardControllers.deleteVirtualCard
 );

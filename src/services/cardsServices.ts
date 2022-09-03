@@ -118,6 +118,11 @@ function ensureCardIsNotVirtual(isVirtual: boolean) {
     );
   }
 }
+function ensureCardIsVirtual(isVirtual: boolean) {
+  if (!isVirtual) {
+    throw new CustomError("error_bad_request", "This is not a virtual card");
+  }
+}
 
 // Repositories getters
 async function getCompanyByAPIkey(API_KEY: string) {
@@ -325,4 +330,16 @@ export async function createVirtualCard(
     expirationDate: virtualCard.expirationDate,
     type: virtualCard.type,
   };
+}
+
+export async function deleteVirtualCard(
+  virtualCardId: number,
+  password: string
+) {
+  const card = await getCardById(virtualCardId);
+  ensureCardExists(card);
+  ensureCardIsVirtual(card.isVirtual);
+  ensurePasswordIsCorrect(card?.password, password);
+
+  await CardRepository.remove(virtualCardId);
 }

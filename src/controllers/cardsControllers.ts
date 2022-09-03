@@ -113,3 +113,14 @@ export async function createVirtualCard(
 
   return res.status(201).send(virtualCard);
 }
+
+export async function deleteVirtualCard(
+  req: Request<{}, {}, { virtualCardId: number; password: string }>,
+  res: Response
+) {
+  const { virtualCardId, password } = req.body;
+
+  await CardsServices.deleteVirtualCard(virtualCardId, password);
+
+  res.sendStatus(204);
+}
