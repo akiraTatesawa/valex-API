@@ -99,3 +99,17 @@ export async function buyFromBusinessOnline(
 
   return res.sendStatus(200);
 }
+
+export async function createVirtualCard(
+  req: Request<{}, {}, { originalCardId: number; password: string }>,
+  res: Response
+) {
+  const { originalCardId, password } = req.body;
+
+  const virtualCard = await CardsServices.createVirtualCard(
+    originalCardId,
+    password
+  );
+
+  return res.send(virtualCard);
+}

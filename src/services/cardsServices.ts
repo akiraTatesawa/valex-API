@@ -14,6 +14,7 @@ import { OnlinePaymentData } from "../interfaces/paymentInterfaces";
 import { Company } from "../interfaces/companyInterfaces";
 import { Employee } from "../interfaces/employeeInterfaces";
 import { Business } from "../interfaces/businessInterfaces";
+import { VirtualCard } from "../classes/VirtualCard";
 
 // Validators
 function ensureCompanyExists(company: Company) {
@@ -277,4 +278,35 @@ export async function buyFromBusinessOnline(paymentData: OnlinePaymentData) {
   ensureSufficientCardBalance(balance, amount);
 
   await PaymentRepository.insert({ cardId: card.id, amount, businessId });
+}
+
+export async function createVirtualCard(
+  originalCardId: number,
+  password: string
+) {
+  const card = await getCardById(originalCardId);
+  ensureCardExists(card);
+  ensureCardIsActivated(card?.password);
+  ensurePasswordIsCorrect(card?.password, password);
+
+  const virtualCard = new VirtualCard(
+    card.employeeId,
+    card.type,
+    card.cardholderName,
+    originalCardId,
+    password
+  );
+
+  await CardRepository.insert(virtualCard);
+
+  const { number, cardholderName, securityCode, expirationDate, type } =
+    virtualCard;
+
+  return {
+    number,
+    cardholderName,
+    securityCode: CryptDataUtils.decryptData(securityCode),
+    expirationDate,
+    type,
+  };
 }

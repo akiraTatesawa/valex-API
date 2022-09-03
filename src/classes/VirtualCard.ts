@@ -10,13 +10,17 @@ export class VirtualCard extends Card {
 
   readonly isVirtual: boolean = true;
 
+  readonly password: string | undefined = undefined;
+
   constructor(
     employeeId: number,
     type: TransactionTypes,
     cardholderName: string,
-    originalCardId: number
+    originalCardId: number,
+    originalCardPassword: string
   ) {
     super(employeeId, type, cardholderName);
     this.originalCardId = originalCardId;
+    this.password = originalCardPassword;
   }
 }
