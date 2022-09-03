@@ -49,6 +49,14 @@ export async function findByCardDetails(
 }
 
 export async function insert(cardData: CardInsertData) {
+  type CardId = {
+    cardId: number;
+  };
+
+  interface InsertResult {
+    rows: CardId[];
+  }
+
   const {
     employeeId,
     number,
@@ -62,11 +70,14 @@ export async function insert(cardData: CardInsertData) {
     type,
   } = cardData;
 
-  connection.query(
+  const {
+    rows: [{ cardId }],
+  }: InsertResult = await connection.query(
     `
     INSERT INTO cards ("employeeId", number, "cardholderName", "securityCode",
       "expirationDate", password, "isVirtual", "originalCardId", "isBlocked", type)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    RETURNING id AS "cardId"
   `,
     [
       employeeId,
@@ -81,6 +92,8 @@ export async function insert(cardData: CardInsertData) {
       type,
     ]
   );
+
+  return cardId;
 }
 
 export async function update(id: number, cardData: CardUpdateData) {

@@ -9,11 +9,12 @@ import * as CryptDataUtils from "../utils/cryptDataUtils";
 import { CustomError } from "../classes/CustomError";
 import { Card } from "../classes/Card";
 import { TransactionTypes } from "../types/cardTypes";
-import { Card as ICard } from "../interfaces/cardInterfaces";
+import { Card as ICard, ResponseCard } from "../interfaces/cardInterfaces";
 import { OnlinePaymentData } from "../interfaces/paymentInterfaces";
 import { Company } from "../interfaces/companyInterfaces";
 import { Employee } from "../interfaces/employeeInterfaces";
 import { Business } from "../interfaces/businessInterfaces";
+import { VirtualCard } from "../classes/VirtualCard";
 
 // Validators
 function ensureCompanyExists(company: Company) {
@@ -109,6 +110,19 @@ function ensureSufficientCardBalance(balance: number, amount: number) {
     throw new CustomError("error_bad_request", "Insufficient card balance");
   }
 }
+function ensureCardIsNotVirtual(isVirtual: boolean, service: string) {
+  if (isVirtual) {
+    throw new CustomError(
+      "error_bad_request",
+      `The ${service} service is not available for virtual cards`
+    );
+  }
+}
+function ensureCardIsVirtual(isVirtual: boolean) {
+  if (!isVirtual) {
+    throw new CustomError("error_bad_request", "This is not a virtual card");
+  }
+}
 
 // Repositories getters
 async function getCompanyByAPIkey(API_KEY: string) {
@@ -147,7 +161,7 @@ export async function createNewCard(
   API_KEY: string,
   employeeId: number,
   cardType: TransactionTypes
-) {
+): Promise<ResponseCard> {
   const company = await getCompanyByAPIkey(API_KEY);
   ensureCompanyExists(company);
 
@@ -159,7 +173,16 @@ export async function createNewCard(
 
   const cardholderName = CardUtils.setCardholderName(employee.fullName);
   const card = new Card(employeeId, cardType, cardholderName);
-  await CardRepository.insert(card);
+  const cardId = await CardRepository.insert(card);
+
+  return {
+    cardId,
+    number: card.number,
+    cardholderName: card.cardholderName,
+    securityCode: CryptDataUtils.decryptData(card.securityCode),
+    expirationDate: card.expirationDate,
+    type: card.type,
+  };
 }
 
 export async function activateCard(
@@ -210,6 +233,7 @@ export async function rechargeCard(
 
   const card = await getCardById(cardId);
   ensureCardExists(card);
+  ensureCardIsNotVirtual(card.isVirtual, "recharge");
   ensureCardIsActivated(card?.password);
   ensureCardIsNotExpired(card.expirationDate);
 
@@ -220,8 +244,11 @@ export async function getCardBalance(cardId: number) {
   const card = await getCardById(cardId);
   ensureCardExists(card);
 
-  const recharges = await getRechargesByCardId(cardId);
-  const transactions = await getPaymentsByCardId(cardId);
+  const id =
+    card.isVirtual && card.originalCardId ? card.originalCardId : cardId;
+
+  const recharges = await getRechargesByCardId(id);
+  const transactions = await getPaymentsByCardId(id);
 
   const balance = CardUtils.calcBalance(recharges, transactions);
 
@@ -236,6 +263,7 @@ export async function buyFromBusiness(
 ) {
   const card = await getCardById(cardId);
   ensureCardExists(card);
+  ensureCardIsNotVirtual(card.isVirtual, "POS shopping");
   ensureCardIsActivated(card?.password);
   ensureCardIsNotExpired(card.expirationDate);
   ensureCardIsNotBlocked(card.isBlocked);
@@ -271,10 +299,55 @@ export async function buyFromBusinessOnline(paymentData: OnlinePaymentData) {
   ensureBusinessExists(business);
   ensureBusinessTypeIsEqualToCardType(business.type, card.type);
 
-  const recharges = await getRechargesByCardId(card.id);
-  const transactions = await getPaymentsByCardId(card.id);
+  const cardId =
+    card.isVirtual && card.originalCardId ? card.originalCardId : card.id;
+
+  const recharges = await getRechargesByCardId(cardId);
+  const transactions = await getPaymentsByCardId(cardId);
   const balance = CardUtils.calcBalance(recharges, transactions);
   ensureSufficientCardBalance(balance, amount);
 
-  await PaymentRepository.insert({ cardId: card.id, amount, businessId });
+  await PaymentRepository.insert({ cardId, amount, businessId });
+}
+
+export async function createVirtualCard(
+  originalCardId: number,
+  password: string
+): Promise<ResponseCard> {
+  const card = await getCardById(originalCardId);
+  ensureCardExists(card);
+  ensureCardIsActivated(card?.password);
+  ensurePasswordIsCorrect(card?.password, password);
+  ensureCardIsNotVirtual(card.isVirtual, "virtual card creation");
+
+  const virtualCard = new VirtualCard(
+    card.employeeId,
+    card.type,
+    card.cardholderName,
+    originalCardId,
+    card?.password
+  );
+
+  const cardId = await CardRepository.insert(virtualCard);
+
+  return {
+    cardId,
+    number: virtualCard.number,
+    cardholderName: virtualCard.cardholderName,
+    securityCode: CryptDataUtils.decryptData(virtualCard.securityCode),
+    expirationDate: virtualCard.expirationDate,
+    type: virtualCard.type,
+  };
+}
+
+export async function deleteVirtualCard(
+  virtualCardId: number,
+  password: string
+) {
+  const card = await getCardById(virtualCardId);
+  ensureCardExists(card);
+  ensureCardIsVirtual(card.isVirtual);
+  ensurePasswordIsCorrect(card?.password, password);
+
+  await CardRepository.remove(virtualCardId);
 }

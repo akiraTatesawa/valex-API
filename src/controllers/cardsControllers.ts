@@ -11,9 +11,9 @@ export async function createCard(
   const { employeeId, cardType } = req.body;
   const { API_KEY } = res.locals;
 
-  await CardsServices.createNewCard(API_KEY, employeeId, cardType);
+  const card = await CardsServices.createNewCard(API_KEY, employeeId, cardType);
 
-  return res.sendStatus(201);
+  return res.status(201).send(card);
 }
 
 export async function activateCard(
@@ -98,4 +98,29 @@ export async function buyFromBusinessOnline(
   await CardsServices.buyFromBusinessOnline(req.body);
 
   return res.sendStatus(200);
+}
+
+export async function createVirtualCard(
+  req: Request<{}, {}, { originalCardId: number; password: string }>,
+  res: Response
+) {
+  const { originalCardId, password } = req.body;
+
+  const virtualCard = await CardsServices.createVirtualCard(
+    originalCardId,
+    password
+  );
+
+  return res.status(201).send(virtualCard);
+}
+
+export async function deleteVirtualCard(
+  req: Request<{}, {}, { virtualCardId: number; password: string }>,
+  res: Response
+) {
+  const { virtualCardId, password } = req.body;
+
+  await CardsServices.deleteVirtualCard(virtualCardId, password);
+
+  res.sendStatus(204);
 }

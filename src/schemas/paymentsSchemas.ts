@@ -15,9 +15,9 @@ export const paymentOnlineSchema = Joi.object({
   cardInfo: Joi.object({
     cardNumber: Joi.string()
       .length(19)
-      .pattern(/^[0-9]{4}\s[0-9]{4}\s[0-9]{4}\s[0-9]{4}$/)
+      .pattern(/^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}$/)
       .message(
-        `"Card Number" must follow the [0-9]*4 [0-9]*4 [0-9]*4 [0-9]*4 pattern`
+        `"Card Number" must follow the [0-9](4)-[0-9](4)-[0-9](4)-[0-9](4) pattern`
       )
       .required(),
     cardholderName: Joi.string()
