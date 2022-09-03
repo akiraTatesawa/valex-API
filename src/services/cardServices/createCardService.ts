@@ -9,7 +9,7 @@ import { CompanyRepositoryInterface } from "../../repositories/companyRepository
 import { EmployeeRepositoryInterface } from "../../repositories/employeeRepository";
 
 export interface CreateCardServiceInterface {
-  execute: (
+  create: (
     API_KEY: string,
     employeeId: number,
     cardType: TransactionTypes
@@ -29,7 +29,7 @@ export class CreateCardService implements CreateCardServiceInterface {
     this.employeeRepository = employeeRepository;
   }
 
-  async execute(
+  async create(
     API_KEY: string,
     employeeId: number,
     cardType: TransactionTypes

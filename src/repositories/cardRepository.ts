@@ -113,7 +113,7 @@ export async function update(id: number, cardData: CardUpdateData) {
   );
 }
 
-export async function remove(id: number) {
+export async function remove(id: number): Promise<void> {
   connection.query<any, [number]>("DELETE FROM cards WHERE id=$1", [id]);
 }
 
@@ -139,6 +139,7 @@ export interface CardRepositoryInterface {
     expirationDate: string
   ) => Promise<Card>;
   update: (id: number, cardData: CardUpdateData) => Promise<void>;
+  remove: (id: number) => Promise<void>;
 }
 
 export class CardRepository implements CardRepositoryInterface {
@@ -236,5 +237,9 @@ export class CardRepository implements CardRepositoryInterface {
     `,
       [id, ...cardValues]
     );
+  }
+
+  async remove(id: number): Promise<void> {
+    connection.query<any, [number]>("DELETE FROM cards WHERE id=$1", [id]);
   }
 }

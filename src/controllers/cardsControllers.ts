@@ -9,7 +9,6 @@ import { PaymentRepository } from "../repositories/paymentRepository";
 import { RechargeRepository } from "../repositories/rechargeRepository";
 import { ActivateCardService } from "../services/cardServices/activateCardService";
 import { BlockCardService } from "../services/cardServices/blockCardService";
-import * as CardsServices from "../services/cardServices/cardsServices";
 import { CardValidator } from "../services/cardServices/cardsServicesValidators";
 import { CreateCardService } from "../services/cardServices/createCardService";
 import { GetCardBalanceService } from "../services/cardServices/getCardBalanceService";
@@ -17,6 +16,8 @@ import { RechargeCardService } from "../services/cardServices/rechargeCardServic
 import { UnblockCardService } from "../services/cardServices/unblockCardService";
 import { OnlinePaymentService } from "../services/paymentServices/onlinePaymentService";
 import { POSPaymentService } from "../services/paymentServices/posPaymentService";
+import { CreateVirtualCardService } from "../services/virtualCardServices/createVirtualCardService";
+import { DeleteVirtualCardService } from "../services/virtualCardServices/deleteVirtualCardService";
 import { TransactionTypes } from "../types/cardTypes";
 
 export async function createCard(
@@ -38,7 +39,7 @@ export async function createCard(
     employeeRepository
   );
 
-  const card = await createCardService.execute(API_KEY, employeeId, cardType);
+  const card = await createCardService.create(API_KEY, employeeId, cardType);
 
   return res.status(201).send(card);
 }
@@ -206,7 +207,15 @@ export async function createVirtualCard(
 ) {
   const { originalCardId, password } = req.body;
 
-  const virtualCard = await CardsServices.createVirtualCard(
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+
+  const createVirtualCardService = new CreateVirtualCardService(
+    cardValidator,
+    cardRepository
+  );
+
+  const virtualCard = await createVirtualCardService.create(
     originalCardId,
     password
   );
@@ -220,7 +229,15 @@ export async function deleteVirtualCard(
 ) {
   const { virtualCardId, password } = req.body;
 
-  await CardsServices.deleteVirtualCard(virtualCardId, password);
+  const cardValidator = new CardValidator();
+  const cardRepository = new CardRepository();
+
+  const deleteVirtualCardService = new DeleteVirtualCardService(
+    cardValidator,
+    cardRepository
+  );
+
+  await deleteVirtualCardService.delete(virtualCardId, password);
 
   res.sendStatus(204);
 }
