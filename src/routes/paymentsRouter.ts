@@ -1,5 +1,5 @@
 import { Router } from "express";
-import * as CardControllers from "../controllers/cardsControllers";
+import * as PaymentController from "../controllers/paymentController";
 import * as SchemaValidatorMiddleware from "../middlewares/schemaMiddleware";
 
 export const paymentsRouter = Router();
@@ -7,11 +7,11 @@ export const paymentsRouter = Router();
 paymentsRouter.post(
   "/payments/pos",
   SchemaValidatorMiddleware.validateBody("paymentPOS"),
-  CardControllers.buyFromBusiness
+  PaymentController.buyFromBusinessPOS
 );
 
 paymentsRouter.post(
   "/payments/online",
   SchemaValidatorMiddleware.validateBody("paymentOnline"),
-  CardControllers.buyFromBusinessOnline
+  PaymentController.buyFromBusinessOnline
 );

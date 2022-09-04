@@ -44,12 +44,11 @@ export async function errorHandlingMiddleware(
       status: 500,
     },
   };
-  console.log(error);
   const { message, type } = error;
 
   if (Errors[type]?.status) {
     const { status } = Errors[type];
-    return res.status(status).send(message);
+    return res.status(status).json({ type, message });
   }
 
   return res.sendStatus(500);

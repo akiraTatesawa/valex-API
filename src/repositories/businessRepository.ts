@@ -1,11 +1,17 @@
 import { connection } from "../dbStrategy/postgres/connection";
 import { Business } from "../interfaces/businessInterfaces";
 
-export async function findById(id: number) {
-  const result = await connection.query<Business, [number]>(
-    "SELECT * FROM businesses WHERE id=$1",
-    [id]
-  );
+export interface BusinessRepositoryInterface {
+  findById: (id: number) => Promise<Business>;
+}
 
-  return result.rows[0];
+export class BusinessRepository implements BusinessRepositoryInterface {
+  async findById(id: number): Promise<Business> {
+    const result = await connection.query<Business, [number]>(
+      "SELECT * FROM businesses WHERE id=$1",
+      [id]
+    );
+
+    return result.rows[0];
+  }
 }

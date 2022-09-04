@@ -1,6 +1,7 @@
 import { Router } from "express";
-import * as CardControllers from "../controllers/cardsControllers";
-import * as CardMiddlewares from "../middlewares/cardsMiddleware";
+import * as CardControllers from "../controllers/cardController";
+import * as RechargeController from "../controllers/rechargeController";
+import * as CardMiddlewares from "../middlewares/cardMiddleware";
 import * as SchemaValidatorMiddleware from "../middlewares/schemaMiddleware";
 
 export const cardsRouter = Router();
@@ -41,7 +42,7 @@ cardsRouter.post(
   SchemaValidatorMiddleware.validateBody("recharge"),
   CardMiddlewares.validateCardId,
   CardMiddlewares.validateApiKey,
-  CardControllers.rechargeCard
+  RechargeController.rechargeCard
 );
 
 cardsRouter.get(
