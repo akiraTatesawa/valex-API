@@ -42,5 +42,5 @@ export async function deleteVirtualCard(
 
   await deleteVirtualCardService.delete(virtualCardId, password);
 
-  res.sendStatus(204);
+  return res.sendStatus(204);
 }
