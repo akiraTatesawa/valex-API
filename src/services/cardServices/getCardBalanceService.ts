@@ -6,7 +6,7 @@ import {
 } from "../../repositories/paymentRepository";
 import { RechargeRepositoryInterface } from "../../repositories/rechargeRepository";
 import { CardValidatorInterface } from "./cardsServicesValidators";
-import * as CardUtils from "../../utils/cardUtils";
+import { CardUtils } from "../../utils/cardUtils";
 
 export interface Balance {
   balance: number;
@@ -41,7 +41,9 @@ export class GetCardBalanceService implements GetCardBalanceServiceInterface {
     const recharges = await this.rechargeRepository.findByCardId(id);
     const transactions = await this.paymentRepository.findByCardId(id);
 
-    const balance = CardUtils.calcBalance(recharges, transactions);
+    const cardUtils = new CardUtils();
+
+    const balance = cardUtils.calcBalance(recharges, transactions);
 
     return { balance, transactions, recharges };
   }

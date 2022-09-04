@@ -1,8 +1,31 @@
 import Cryptr from "cryptr";
+import bcrypt from "bcrypt";
 
-const { CRYPTR_SECRET_KEY } = process.env;
+export interface CryptDataInterface {
+  encryptData: (data: string) => string;
+  decryptData: (data: string) => string;
+  hashDataBcrypt: (data: string) => string;
+  validateEncryptedData: (data: string, hashData: string) => boolean;
+}
 
-const cryptr = new Cryptr(CRYPTR_SECRET_KEY);
+export class CryptDataUtils implements CryptDataInterface {
+  private secret = process.env.CRYPTR_SECRET_KEY;
 
-export const encryptData = (data: string): string => cryptr.encrypt(data);
-export const decryptData = (data: string): string => cryptr.decrypt(data);
+  private cryptr = new Cryptr(this.secret);
+
+  encryptData(data: string): string {
+    return this.cryptr.encrypt(data);
+  }
+
+  decryptData(data: string): string {
+    return this.cryptr.decrypt(data);
+  }
+
+  hashDataBcrypt(data: string): string {
+    return bcrypt.hashSync(data, 10);
+  }
+
+  validateEncryptedData(data: string, hashData: string): boolean {
+    return bcrypt.compareSync(data, hashData);
+  }
+}

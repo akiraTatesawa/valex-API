@@ -1,5 +1,5 @@
-import * as CardUtils from "../../utils/cardUtils";
-import * as CryptDataUtils from "../../utils/cryptDataUtils";
+import { CardUtilsInterface } from "../../utils/cardUtils";
+import { CryptDataInterface } from "../../utils/cryptDataUtils";
 import { CustomError } from "../../classes/CustomError";
 import { Card as ICard } from "../../interfaces/cardInterfaces";
 import { Company } from "../../interfaces/companyInterfaces";
@@ -17,10 +17,14 @@ export interface CardValidatorInterface {
   ) => void;
   ensureCardExists: (card: ICard) => void;
   ensureCardIsNotActivated: (password: string | undefined) => void;
-  ensureCardIsNotExpired: (expirationDate: string) => void;
+  ensureCardIsNotExpired: (
+    expirationDate: string,
+    cardUtils: CardUtilsInterface
+  ) => void;
   ensureSecurityCodeIsCorrect: (
     cardSecurityCode: string,
-    reqCVC: string
+    reqCVC: string,
+    cryptDataUtils: CryptDataInterface
   ) => void;
   ensureCardIsActivated: (password: string | undefined) => void;
   ensureCardIsUnblocked: (isBlocked: boolean) => void;
@@ -28,7 +32,8 @@ export interface CardValidatorInterface {
   ensureCardIsBlocked: (isBlocked: boolean) => void;
   ensurePasswordIsCorrect: (
     cardPassword: string | undefined,
-    reqPassword: string
+    reqPassword: string,
+    cryptDataUtils: CryptDataInterface
   ) => void;
   ensureBusinessTypeIsEqualToCardType: (
     businessType: TransactionTypes,
@@ -82,14 +87,21 @@ export class CardValidator implements CardValidatorInterface {
     }
   }
 
-  ensureCardIsNotExpired(expirationDate: string) {
-    if (CardUtils.setIsExpired(expirationDate)) {
+  ensureCardIsNotExpired(
+    expirationDate: string,
+    cardUtils: CardUtilsInterface
+  ) {
+    if (cardUtils.setIsExpired(expirationDate)) {
       throw new CustomError("error_bad_request", "This card is expired");
     }
   }
 
-  ensureSecurityCodeIsCorrect(cardSecurityCode: string, reqCVC: string) {
-    if (CryptDataUtils.decryptData(cardSecurityCode) !== reqCVC) {
+  ensureSecurityCodeIsCorrect(
+    cardSecurityCode: string,
+    reqCVC: string,
+    cryptDataUtils: CryptDataInterface
+  ) {
+    if (cryptDataUtils.decryptData(cardSecurityCode) !== reqCVC) {
       throw new CustomError(
         "error_unauthorized",
         "Incorrect card security code"
@@ -126,11 +138,12 @@ export class CardValidator implements CardValidatorInterface {
 
   ensurePasswordIsCorrect(
     cardPassword: string | undefined,
-    reqPassword: string
+    reqPassword: string,
+    cryptDataUtils: CryptDataInterface
   ) {
     if (
       cardPassword &&
-      CryptDataUtils.decryptData(cardPassword) !== reqPassword
+      !cryptDataUtils.validateEncryptedData(reqPassword, cardPassword)
     ) {
       throw new CustomError("error_unauthorized", "Incorrect password");
     }

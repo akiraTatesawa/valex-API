@@ -4,7 +4,8 @@ import { CardRepositoryInterface } from "../../repositories/cardRepository";
 import { PaymentRepositoryInterface } from "../../repositories/paymentRepository";
 import { RechargeRepositoryInterface } from "../../repositories/rechargeRepository";
 import { CardValidatorInterface } from "../cardServices/cardsServicesValidators";
-import * as CardUtils from "../../utils/cardUtils";
+import { CardUtils } from "../../utils/cardUtils";
+import { CryptDataUtils } from "../../utils/cryptDataUtils";
 
 export interface OnlinePayment {
   execute: (paymentData: OnlinePaymentData) => Promise<void>;
@@ -35,14 +36,18 @@ export class OnlinePaymentService implements OnlinePayment {
       cardInfo.cardholderName,
       cardInfo.expirationDate
     );
-
     this.cardValidator.ensureCardExists(card);
     this.cardValidator.ensureCardIsActivated(card?.password);
-    this.cardValidator.ensureCardIsNotExpired(card.expirationDate);
     this.cardValidator.ensureCardIsNotBlocked(card.isBlocked);
+
+    const cardUtils = new CardUtils();
+    this.cardValidator.ensureCardIsNotExpired(card.expirationDate, cardUtils);
+
+    const cryptDataUtils = new CryptDataUtils();
     this.cardValidator.ensureSecurityCodeIsCorrect(
       card.securityCode,
-      cardInfo.CVC
+      cardInfo.CVC,
+      cryptDataUtils
     );
 
     const business = await this.businessRepository.findById(businessId);
@@ -57,7 +62,7 @@ export class OnlinePaymentService implements OnlinePayment {
 
     const recharges = await this.rechargeRepository.findByCardId(cardId);
     const transactions = await this.paymentRepository.findByCardId(cardId);
-    const balance = CardUtils.calcBalance(recharges, transactions);
+    const balance = cardUtils.calcBalance(recharges, transactions);
     this.cardValidator.ensureSufficientCardBalance(balance, amount);
 
     await this.paymentRepository.insert({ cardId, amount, businessId });

@@ -1,4 +1,6 @@
 import { CardRepositoryInterface } from "../../repositories/cardRepository";
+import { CardUtils } from "../../utils/cardUtils";
+import { CryptDataUtils } from "../../utils/cryptDataUtils";
 import { CardValidatorInterface } from "./cardsServicesValidators";
 
 export interface UnblockCardServiceInterface {
@@ -16,12 +18,19 @@ export class UnblockCardService implements UnblockCardServiceInterface {
 
   async execute(cardId: number, password: string) {
     const card = await this.cardRepository.findById(cardId);
-
     this.cardValidator.ensureCardExists(card);
     this.cardValidator.ensureCardIsActivated(card?.password);
-    this.cardValidator.ensureCardIsNotExpired(card.expirationDate);
     this.cardValidator.ensureCardIsBlocked(card.isBlocked);
-    this.cardValidator.ensurePasswordIsCorrect(card?.password, password);
+
+    const cardUtils = new CardUtils();
+    this.cardValidator.ensureCardIsNotExpired(card.expirationDate, cardUtils);
+
+    const cryptDataUtils = new CryptDataUtils();
+    this.cardValidator.ensurePasswordIsCorrect(
+      card?.password,
+      password,
+      cryptDataUtils
+    );
 
     await this.cardRepository.update(cardId, { isBlocked: false });
   }

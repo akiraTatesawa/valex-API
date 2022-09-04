@@ -1,4 +1,5 @@
 import { CardRepositoryInterface } from "../../repositories/cardRepository";
+import { CryptDataUtils } from "../../utils/cryptDataUtils";
 import { CardValidatorInterface } from "../cardServices/cardsServicesValidators";
 
 export interface DeleteVirtualCard {
@@ -18,7 +19,13 @@ export class DeleteVirtualCardService implements DeleteVirtualCard {
     const card = await this.cardRepository.findById(virtualCardId);
     this.cardValidator.ensureCardExists(card);
     this.cardValidator.ensureCardIsVirtual(card.isVirtual);
-    this.cardValidator.ensurePasswordIsCorrect(card?.password, password);
+
+    const cryptDataUtils = new CryptDataUtils();
+    this.cardValidator.ensurePasswordIsCorrect(
+      card?.password,
+      password,
+      cryptDataUtils
+    );
 
     await this.cardRepository.remove(virtualCardId);
   }

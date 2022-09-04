@@ -4,7 +4,8 @@ import { PaymentRepositoryInterface } from "../../repositories/paymentRepository
 import { RechargeRepositoryInterface } from "../../repositories/rechargeRepository";
 import { CardValidatorInterface } from "../cardServices/cardsServicesValidators";
 
-import * as CardUtils from "../../utils/cardUtils";
+import { CardUtils } from "../../utils/cardUtils";
+import { CryptDataUtils } from "../../utils/cryptDataUtils";
 
 export interface POSPaymentInterface {
   execute: (
@@ -40,9 +41,17 @@ export class POSPaymentService implements POSPaymentInterface {
     this.cardValidator.ensureCardExists(card);
     this.cardValidator.ensureCardIsNotVirtual(card.isVirtual, "POS shopping");
     this.cardValidator.ensureCardIsActivated(card?.password);
-    this.cardValidator.ensureCardIsNotExpired(card.expirationDate);
     this.cardValidator.ensureCardIsNotBlocked(card.isBlocked);
-    this.cardValidator.ensurePasswordIsCorrect(card?.password, password);
+
+    const cardUtils = new CardUtils();
+    this.cardValidator.ensureCardIsNotExpired(card.expirationDate, cardUtils);
+
+    const cryptDataUtils = new CryptDataUtils();
+    this.cardValidator.ensurePasswordIsCorrect(
+      card?.password,
+      password,
+      cryptDataUtils
+    );
 
     const business = await this.businessRepository.findById(businessId);
     this.cardValidator.ensureBusinessExists(business);
@@ -53,7 +62,7 @@ export class POSPaymentService implements POSPaymentInterface {
 
     const recharges = await this.rechargeRepository.findByCardId(cardId);
     const transactions = await this.paymentRepository.findByCardId(cardId);
-    const balance = CardUtils.calcBalance(recharges, transactions);
+    const balance = cardUtils.calcBalance(recharges, transactions);
     this.cardValidator.ensureSufficientCardBalance(balance, amount);
 
     await this.paymentRepository.insert({ cardId, amount, businessId });

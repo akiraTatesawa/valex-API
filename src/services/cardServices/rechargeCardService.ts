@@ -1,6 +1,7 @@
 import { CardRepositoryInterface } from "../../repositories/cardRepository";
 import { CompanyRepositoryInterface } from "../../repositories/companyRepository";
 import { RechargeRepositoryInterface } from "../../repositories/rechargeRepository";
+import { CardUtils } from "../../utils/cardUtils";
 import { CardValidatorInterface } from "./cardsServicesValidators";
 
 export interface RechargeCardServiceInterface {
@@ -28,7 +29,9 @@ export class RechargeCardService implements RechargeCardServiceInterface {
     this.cardValidator.ensureCardExists(card);
     this.cardValidator.ensureCardIsNotVirtual(card.isVirtual, "recharge");
     this.cardValidator.ensureCardIsActivated(card?.password);
-    this.cardValidator.ensureCardIsNotExpired(card.expirationDate);
+
+    const cardUtils = new CardUtils();
+    this.cardValidator.ensureCardIsNotExpired(card.expirationDate, cardUtils);
 
     await this.rechargeRepository.insert({ cardId, amount });
   }

@@ -2,11 +2,11 @@ import { Card } from "../../classes/Card";
 import { ResponseCard } from "../../interfaces/cardInterfaces";
 import { CardRepositoryInterface } from "../../repositories/cardRepository";
 import { TransactionTypes } from "../../types/cardTypes";
-import * as CardUtils from "../../utils/cardUtils";
-import * as CryptDataUtils from "../../utils/cryptDataUtils";
 import { CardValidatorInterface } from "./cardsServicesValidators";
 import { CompanyRepositoryInterface } from "../../repositories/companyRepository";
 import { EmployeeRepositoryInterface } from "../../repositories/employeeRepository";
+import { CardUtils } from "../../utils/cardUtils";
+import { CryptDataUtils } from "../../utils/cryptDataUtils";
 
 export interface CreateCardServiceInterface {
   create: (
@@ -44,15 +44,19 @@ export class CreateCardService implements CreateCardServiceInterface {
       cardType,
       employeeId
     );
-
     this.cardValidator.ensureEmployeeDoesNotHaveThisCardType(
       existingCard,
       cardType
     );
 
-    const cardholderName = CardUtils.setCardholderName(employee.fullName);
+    const cardUtils = new CardUtils();
+    const cryptDataUtils = new CryptDataUtils();
 
-    const card = new Card(employeeId, cardType, cardholderName);
+    const cardholderName = cardUtils.setCardholderName(employee.fullName);
+
+    console.log(cryptDataUtils.encryptData("zap"));
+
+    const card = new Card(employeeId, cardType, cardholderName, cryptDataUtils);
 
     const resultCardId = await this.cardRepository.insert(card);
 
@@ -60,7 +64,7 @@ export class CreateCardService implements CreateCardServiceInterface {
       cardId: resultCardId,
       number: card.number,
       cardholderName: card.cardholderName,
-      securityCode: CryptDataUtils.decryptData(card.securityCode),
+      securityCode: cryptDataUtils.decryptData(card.securityCode),
       expirationDate: card.expirationDate,
       type: card.type,
     };
