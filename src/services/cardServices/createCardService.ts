@@ -5,8 +5,8 @@ import { TransactionTypes } from "../../types/cardTypes";
 import { CardValidatorInterface } from "./cardsServicesValidators";
 import { CompanyRepositoryInterface } from "../../repositories/companyRepository";
 import { EmployeeRepositoryInterface } from "../../repositories/employeeRepository";
-import { CardUtils } from "../../utils/cardUtils";
-import { CryptDataUtils } from "../../utils/cryptDataUtils";
+import { CardUtilsInterface } from "../../utils/cardUtils";
+import { CryptDataInterface } from "../../utils/cryptDataUtils";
 
 export interface CreateCardServiceInterface {
   create: (
@@ -19,11 +19,15 @@ export interface CreateCardServiceInterface {
 export class CreateCardService implements CreateCardServiceInterface {
   constructor(
     private cardValidator: CardValidatorInterface,
+    private cryptDataUtils: CryptDataInterface,
+    private cardUtils: CardUtilsInterface,
     private cardRepository: CardRepositoryInterface,
     private companyRepository: CompanyRepositoryInterface,
     private employeeRepository: EmployeeRepositoryInterface
   ) {
     this.cardValidator = cardValidator;
+    this.cardUtils = cardUtils;
+    this.cryptDataUtils = cryptDataUtils;
     this.cardRepository = cardRepository;
     this.companyRepository = companyRepository;
     this.employeeRepository = employeeRepository;
@@ -48,15 +52,14 @@ export class CreateCardService implements CreateCardServiceInterface {
       existingCard,
       cardType
     );
+    const cardholderName = this.cardUtils.setCardholderName(employee.fullName);
 
-    const cardUtils = new CardUtils();
-    const cryptDataUtils = new CryptDataUtils();
-
-    const cardholderName = cardUtils.setCardholderName(employee.fullName);
-
-    console.log(cryptDataUtils.encryptData("zap"));
-
-    const card = new Card(employeeId, cardType, cardholderName, cryptDataUtils);
+    const card = new Card(
+      employeeId,
+      cardType,
+      cardholderName,
+      this.cryptDataUtils
+    );
 
     const resultCardId = await this.cardRepository.insert(card);
 
@@ -64,7 +67,7 @@ export class CreateCardService implements CreateCardServiceInterface {
       cardId: resultCardId,
       number: card.number,
       cardholderName: card.cardholderName,
-      securityCode: cryptDataUtils.decryptData(card.securityCode),
+      securityCode: this.cryptDataUtils.decryptData(card.securityCode),
       expirationDate: card.expirationDate,
       type: card.type,
     };

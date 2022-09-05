@@ -6,7 +6,7 @@ import {
 } from "../../repositories/paymentRepository";
 import { RechargeRepositoryInterface } from "../../repositories/rechargeRepository";
 import { CardValidatorInterface } from "./cardsServicesValidators";
-import { CardUtils } from "../../utils/cardUtils";
+import { CardUtilsInterface } from "../../utils/cardUtils";
 
 export interface Balance {
   balance: number;
@@ -21,11 +21,13 @@ export interface GetCardBalanceServiceInterface {
 export class GetCardBalanceService implements GetCardBalanceServiceInterface {
   constructor(
     private cardValidator: CardValidatorInterface,
+    private cardUtils: CardUtilsInterface,
     private cardRepository: CardRepositoryInterface,
     private rechargeRepository: RechargeRepositoryInterface,
     private paymentRepository: PaymentRepositoryInterface
   ) {
     this.cardValidator = cardValidator;
+    this.cardUtils = cardUtils;
     this.cardRepository = cardRepository;
     this.rechargeRepository = rechargeRepository;
     this.paymentRepository = paymentRepository;
@@ -35,15 +37,11 @@ export class GetCardBalanceService implements GetCardBalanceServiceInterface {
     const card = await this.cardRepository.findById(cardId);
     this.cardValidator.ensureCardExists(card);
 
-    const id =
-      card.isVirtual && card.originalCardId ? card.originalCardId : cardId;
+    const id = card.originalCardId! ? card.originalCardId : cardId;
 
     const recharges = await this.rechargeRepository.findByCardId(id);
     const transactions = await this.paymentRepository.findByCardId(id);
-
-    const cardUtils = new CardUtils();
-
-    const balance = cardUtils.calcBalance(recharges, transactions);
+    const balance = this.cardUtils.calcBalance(recharges, transactions);
 
     return { balance, transactions, recharges };
   }

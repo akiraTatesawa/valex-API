@@ -9,9 +9,12 @@ export interface CryptDataInterface {
 }
 
 export class CryptDataUtils implements CryptDataInterface {
-  private secret = process.env.CRYPTR_SECRET_KEY;
+  private cryptr: Cryptr;
 
-  private cryptr = new Cryptr(this.secret);
+  constructor(private secret: string) {
+    this.secret = secret;
+    this.cryptr = new Cryptr(this.secret);
+  }
 
   encryptData(data: string): string {
     return this.cryptr.encrypt(data);

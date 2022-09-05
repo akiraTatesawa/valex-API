@@ -3,6 +3,7 @@ import { CardRepository } from "../repositories/cardRepository";
 import { CardValidator } from "../services/cardServices/cardsServicesValidators";
 import { CreateVirtualCardService } from "../services/virtualCardServices/createVirtualCardService";
 import { DeleteVirtualCardService } from "../services/virtualCardServices/deleteVirtualCardService";
+import { CryptDataUtils } from "../utils/cryptDataUtils";
 
 export async function createVirtualCard(
   req: Request<{}, {}, { originalCardId: number; password: string }>,
@@ -12,10 +13,12 @@ export async function createVirtualCard(
 
   const cardValidator = new CardValidator();
   const cardRepository = new CardRepository();
+  const cryptDataUtils = new CryptDataUtils(process.env.CRYPTR_SECRET_KEY);
 
   const createVirtualCardService = new CreateVirtualCardService(
     cardValidator,
-    cardRepository
+    cardRepository,
+    cryptDataUtils
   );
 
   const virtualCard = await createVirtualCardService.create(
@@ -34,13 +37,15 @@ export async function deleteVirtualCard(
 
   const cardValidator = new CardValidator();
   const cardRepository = new CardRepository();
+  const cryptDataUtils = new CryptDataUtils(process.env.CRYPTR_SECRET_KEY);
 
   const deleteVirtualCardService = new DeleteVirtualCardService(
     cardValidator,
-    cardRepository
+    cardRepository,
+    cryptDataUtils
   );
 
   await deleteVirtualCardService.delete(virtualCardId, password);
 
-  res.sendStatus(204);
+  return res.sendStatus(204);
 }

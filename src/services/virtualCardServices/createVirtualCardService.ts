@@ -2,7 +2,7 @@ import { VirtualCard } from "../../classes/VirtualCard";
 import { ResponseCard } from "../../interfaces/cardInterfaces";
 import { CardRepositoryInterface } from "../../repositories/cardRepository";
 import { CardValidatorInterface } from "../cardServices/cardsServicesValidators";
-import { CryptDataUtils } from "../../utils/cryptDataUtils";
+import { CryptDataInterface } from "../../utils/cryptDataUtils";
 
 export interface CreateVirtualCard {
   create: (originalCardId: number, password: string) => Promise<ResponseCard>;
@@ -11,10 +11,12 @@ export interface CreateVirtualCard {
 export class CreateVirtualCardService implements CreateVirtualCard {
   constructor(
     private cardValidator: CardValidatorInterface,
-    private cardRepository: CardRepositoryInterface
+    private cardRepository: CardRepositoryInterface,
+    private cryptDataUtils: CryptDataInterface
   ) {
     this.cardValidator = cardValidator;
     this.cardRepository = cardRepository;
+    this.cryptDataUtils = cryptDataUtils;
   }
 
   async create(
@@ -29,18 +31,17 @@ export class CreateVirtualCardService implements CreateVirtualCard {
       "virtual card creation"
     );
 
-    const cryptDataUtils = new CryptDataUtils();
     this.cardValidator.ensurePasswordIsCorrect(
       card?.password,
       password,
-      cryptDataUtils
+      this.cryptDataUtils
     );
 
     const virtualCard = new VirtualCard(
       card.employeeId,
       card.type,
       card.cardholderName,
-      cryptDataUtils,
+      this.cryptDataUtils,
       originalCardId,
       card?.password
     );
@@ -51,7 +52,7 @@ export class CreateVirtualCardService implements CreateVirtualCard {
       cardId: resultCardId,
       number: virtualCard.number,
       cardholderName: virtualCard.cardholderName,
-      securityCode: cryptDataUtils.decryptData(virtualCard.securityCode),
+      securityCode: this.cryptDataUtils.decryptData(virtualCard.securityCode),
       expirationDate: virtualCard.expirationDate,
       type: virtualCard.type,
     };

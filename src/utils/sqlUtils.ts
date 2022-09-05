@@ -1,5 +1,9 @@
+import { NewCard as ICard } from "../interfaces/cardInterfaces";
+
+type UpdatedCard = Partial<ICard>;
+
 type UpdateObject = {
-  object: object;
+  object: UpdatedCard;
   offset: number;
 };
 

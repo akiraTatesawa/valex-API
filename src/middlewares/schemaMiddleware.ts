@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { ObjectSchema } from "joi";
 import { CustomError } from "../classes/CustomError";
 import {
   createCardSchema as create,
@@ -14,32 +13,22 @@ import {
   paymentOnlineSchema as paymentOnline,
 } from "../schemas/paymentsSchemas";
 
-interface SchemasInterface {
-  [schemaName: string]: ObjectSchema;
-}
+const Schemas = {
+  create,
+  createVirtual,
+  deleteVirtual,
+  activation,
+  blockUnblock,
+  paymentPOS,
+  paymentOnline,
+  recharge,
+};
 
-type Validator =
-  | "create"
-  | "createVirtual"
-  | "deleteVirtual"
-  | "activation"
-  | "blockUnblock"
-  | "paymentPOS"
-  | "paymentOnline"
-  | "recharge";
+type Validator = keyof typeof Schemas;
 
-export function validateBody(validator: Validator) {
-  const Schemas: SchemasInterface = {
-    create,
-    createVirtual,
-    deleteVirtual,
-    activation,
-    blockUnblock,
-    paymentPOS,
-    paymentOnline,
-    recharge,
-  };
-
+export function validateBody(
+  validator: Validator
+): (req: Request, _res: Response, next: NextFunction) => Promise<void> {
   if (!Object.hasOwn(Schemas, validator)) {
     throw new CustomError(
       "error_internal_server_error",
@@ -47,7 +36,7 @@ export function validateBody(validator: Validator) {
     );
   }
 
-  return (req: Request, _res: Response, next: NextFunction) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     const { error } = Schemas[validator].validate(req.body, {
       abortEarly: false,
     });

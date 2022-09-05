@@ -8,6 +8,8 @@ import { RechargeRepository } from "../repositories/rechargeRepository";
 import { CardValidator } from "../services/cardServices/cardsServicesValidators";
 import { OnlinePaymentService } from "../services/paymentServices/onlinePaymentService";
 import { POSPaymentService } from "../services/paymentServices/posPaymentService";
+import { CardUtils } from "../utils/cardUtils";
+import { CryptDataUtils } from "../utils/cryptDataUtils";
 
 export async function buyFromBusinessPOS(
   req: Request<
@@ -20,6 +22,8 @@ export async function buyFromBusinessPOS(
   const { cardId, password, businessId, amount } = req.body;
 
   const cardValidator = new CardValidator();
+  const cardUtils = new CardUtils();
+  const cryptDataUtils = new CryptDataUtils(process.env.CRYPTR_SECRET_KEY);
   const cardRepository = new CardRepository();
   const businessRepository = new BusinessRepository();
   const rechargeRepository = new RechargeRepository();
@@ -27,6 +31,8 @@ export async function buyFromBusinessPOS(
 
   const posPaymentService = new POSPaymentService(
     cardValidator,
+    cryptDataUtils,
+    cardUtils,
     cardRepository,
     businessRepository,
     rechargeRepository,
@@ -43,6 +49,8 @@ export async function buyFromBusinessOnline(
   res: Response
 ) {
   const cardValidator = new CardValidator();
+  const cardUtils = new CardUtils();
+  const cryptDataUtils = new CryptDataUtils(process.env.CRYPTR_SECRET_KEY);
   const cardRepository = new CardRepository();
   const businessRepository = new BusinessRepository();
   const rechargeRepository = new RechargeRepository();
@@ -50,6 +58,8 @@ export async function buyFromBusinessOnline(
 
   const onlinePaymentService = new OnlinePaymentService(
     cardValidator,
+    cryptDataUtils,
+    cardUtils,
     cardRepository,
     businessRepository,
     rechargeRepository,
