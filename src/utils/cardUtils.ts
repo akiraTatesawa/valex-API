@@ -1,5 +1,8 @@
+/* eslint-disable function-paren-newline */
+/* eslint-disable implicit-arrow-linebreak */
 import dayjs from "dayjs";
-import { Recharge } from "../interfaces/rechargeInterfaces";
+import { FormattedPayment } from "../interfaces/paymentInterfaces";
+import { FormattedRecharge, Recharge } from "../interfaces/rechargeInterfaces";
 import { PaymentWithBusinessName } from "../repositories/paymentRepository";
 
 export interface CardUtilsInterface {
@@ -9,6 +12,10 @@ export interface CardUtilsInterface {
     recharges: Recharge[],
     transactions: PaymentWithBusinessName[]
   ) => number;
+  formatPayments: (
+    transactions: PaymentWithBusinessName[]
+  ) => FormattedPayment[];
+  formatRecharges: (transactions: Recharge[]) => FormattedRecharge[];
 }
 
 export class CardUtils implements CardUtilsInterface {
@@ -47,5 +54,23 @@ export class CardUtils implements CardUtilsInterface {
       transactions.reduce((prev, curr) => prev + curr.amount, 0);
 
     return balance;
+  }
+
+  formatPayments(transactions: PaymentWithBusinessName[]): FormattedPayment[] {
+    const formattedTransactions = transactions.map((transaction) => ({
+      ...transaction,
+      timestamp: dayjs(transaction.timestamp).format("DD/MM/YYYY"),
+    }));
+
+    return formattedTransactions;
+  }
+
+  formatRecharges(transactions: Recharge[]): FormattedRecharge[] {
+    const formattedTransactions = transactions.map((transaction) => ({
+      ...transaction,
+      timestamp: dayjs(transaction.timestamp).format("DD/MM/YYYY"),
+    }));
+
+    return formattedTransactions;
   }
 }
