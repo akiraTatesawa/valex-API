@@ -54,6 +54,8 @@ The API is responsible for creating, reloading, activating, as well as processin
     ```
 5. Set your environment variables following the .env.sample file:
 
+   **Notes**: `PORT` must be a number, `DATABASE_URL` and `CRYPTR_SECRET_KEY` must be strings
+
    ```ts
     PORT=
     DATABASE_URL=
