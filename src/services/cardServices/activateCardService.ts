@@ -1,7 +1,7 @@
 import { CardRepositoryInterface } from "../../repositories/cardRepository";
 import { CardValidatorInterface } from "./cardsServicesValidators";
-import { CryptDataUtils } from "../../utils/cryptDataUtils";
-import { CardUtils } from "../../utils/cardUtils";
+import { CryptDataInterface } from "../../utils/cryptDataUtils";
+import { CardUtilsInterface } from "../../utils/cardUtils";
 
 export interface ActivateCardServiceInterface {
   execute: (cardId: number, password: string, CVC: string) => Promise<void>;
@@ -10,9 +10,13 @@ export interface ActivateCardServiceInterface {
 export class ActivateCardService implements ActivateCardServiceInterface {
   constructor(
     private cardValidator: CardValidatorInterface,
+    private cryptDataUtils: CryptDataInterface,
+    private cardUtils: CardUtilsInterface,
     private cardRepository: CardRepositoryInterface
   ) {
     this.cardValidator = cardValidator;
+    this.cardUtils = cardUtils;
+    this.cryptDataUtils = cryptDataUtils;
     this.cardRepository = cardRepository;
   }
 
@@ -21,17 +25,18 @@ export class ActivateCardService implements ActivateCardServiceInterface {
     this.cardValidator.ensureCardExists(card);
     this.cardValidator.ensureCardIsNotActivated(card?.password);
 
-    const cardUtils = new CardUtils();
-    this.cardValidator.ensureCardIsNotExpired(card.expirationDate, cardUtils);
+    this.cardValidator.ensureCardIsNotExpired(
+      card.expirationDate,
+      this.cardUtils
+    );
 
-    const cryptDataUtils = new CryptDataUtils();
     this.cardValidator.ensureSecurityCodeIsCorrect(
       card.securityCode,
       CVC,
-      cryptDataUtils
+      this.cryptDataUtils
     );
 
-    const encryptedPassword = cryptDataUtils.hashDataBcrypt(password);
+    const encryptedPassword = this.cryptDataUtils.hashDataBcrypt(password);
 
     await this.cardRepository.update(cardId, { password: encryptedPassword });
   }

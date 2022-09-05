@@ -4,6 +4,7 @@ import { CompanyRepository } from "../repositories/companyRepository";
 import { RechargeRepository } from "../repositories/rechargeRepository";
 import { CardValidator } from "../services/cardServices/cardsServicesValidators";
 import { RechargeCardService } from "../services/cardServices/rechargeCardService";
+import { CardUtils } from "../utils/cardUtils";
 
 export async function rechargeCard(
   req: Request<{ cardId: string }, {}, { amount: number }>,
@@ -14,12 +15,14 @@ export async function rechargeCard(
   const { API_KEY } = res.locals;
 
   const cardValidator = new CardValidator();
+  const cardUtils = new CardUtils();
   const cardRepository = new CardRepository();
   const rechargeRepository = new RechargeRepository();
   const companyRepository = new CompanyRepository();
 
   const rechargeCardService = new RechargeCardService(
     cardValidator,
+    cardUtils,
     cardRepository,
     rechargeRepository,
     companyRepository

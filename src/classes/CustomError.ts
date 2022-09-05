@@ -1,5 +1,5 @@
-import { ErrorType } from "../types/errorTypes";
 import { CustomError as CustomErrorInterface } from "../interfaces/customErrorInterface";
+import { ErrorType } from "../middlewares/errorHandlingMiddleware";
 
 export class CustomError implements CustomErrorInterface {
   type: ErrorType;
