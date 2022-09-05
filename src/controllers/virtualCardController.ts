@@ -1,25 +1,14 @@
 import { Request, Response } from "express";
-import { CardRepository } from "../repositories/cardRepository";
-import { CardValidator } from "../services/cardServices/cardsServicesValidators";
-import { CreateVirtualCardService } from "../services/virtualCardServices/createVirtualCardService";
-import { DeleteVirtualCardService } from "../services/virtualCardServices/deleteVirtualCardService";
-import { CryptDataUtils } from "../utils/cryptDataUtils";
+import {
+  createVirtualCardService,
+  deleteVirtualCardService,
+} from "../services/virtualCardServices";
 
 export async function createVirtualCard(
   req: Request<{}, {}, { originalCardId: number; password: string }>,
   res: Response
 ) {
   const { originalCardId, password } = req.body;
-
-  const cardValidator = new CardValidator();
-  const cardRepository = new CardRepository();
-  const cryptDataUtils = new CryptDataUtils(process.env.CRYPTR_SECRET_KEY);
-
-  const createVirtualCardService = new CreateVirtualCardService(
-    cardValidator,
-    cardRepository,
-    cryptDataUtils
-  );
 
   const virtualCard = await createVirtualCardService.create(
     originalCardId,
@@ -34,16 +23,6 @@ export async function deleteVirtualCard(
   res: Response
 ) {
   const { virtualCardId, password } = req.body;
-
-  const cardValidator = new CardValidator();
-  const cardRepository = new CardRepository();
-  const cryptDataUtils = new CryptDataUtils(process.env.CRYPTR_SECRET_KEY);
-
-  const deleteVirtualCardService = new DeleteVirtualCardService(
-    cardValidator,
-    cardRepository,
-    cryptDataUtils
-  );
 
   await deleteVirtualCardService.delete(virtualCardId, password);
 
