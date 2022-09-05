@@ -66,26 +66,29 @@ The API is responsible for creating, reloading, activating, as well as processin
 ## Features
 
 **Notes:**
-- `_.CARD_TYPE` must only assume the following values: 'groceries', 'restaurants', 'transport', 'education', 'health';
-- `_.EMPLOYEE_ID` must be a valid employee id;
-- `_.COMPANY_API_KEY` must be a valid company key;
-- `_.CARD_PASSWORD` must be a string made up of four numbers;
-- `_.CARD_CVC` must be a string made up of 3 numbers and must be a valid card CVC;
-- `_.AMOUNT` must be an integer greater than zero;
+- `cardType` must only assume the following values: 'groceries', 'restaurants', 'transport', 'education', 'health';
+- `employeeId` must be a valid employee id;
+- `x-api-key` must be a valid company key;
+- `password` must be a string made up of four numbers;
+- `CVC` must be a string made up of 3 numbers and must be a valid card CVC;
+- `amount` must be an integer greater than zero;
 
 ### Card Creation
 
-- **Endpoint**: `_.URL/cards/create`
-- **Request Body**: 
+- **Endpoint**: 
+   ```http
+   POST /cards/create
    ```
+- **Request Body**: 
+   ```json
   {
-    "cardType": _.CARD_TYPE,
-    "employeeId": _.EMPLOYEE_ID
+    "cardType": "health",
+    "employeeId": 2
   }
   ```
-- **Request Header**: `x-api-key: _.COMPANY_API_KEY`
+- **Request Header**: `x-api-key: "key.example.123"`
 - **Response Example**:
-    ```
+    ```json
     {
       "cardId": 3,
       "number": "7175-2620-5613-5534",
@@ -98,51 +101,66 @@ The API is responsible for creating, reloading, activating, as well as processin
     
 ### Card Activation
 
-- **Endpoint**: `_.URL/cards/:cardId/activate`
-- **Request Body**: 
+- **Endpoint**: 
+   ```http
+   PATCH /cards/:cardId/activate
    ```
+- **Request Body**: 
+   ```json
   {
-    "password": _.CARD_PASSWORD,
-    "CVC": _.CARD_CVC
+    "password": "1234",
+    "CVC": "123"
   }
   ```
 
 ### Card Blocking
 
-- **Endpoint**: `_.URL/cards/:cardId/block`
-- **Request Body**: 
+- **Endpoint**: 
+   ```http
+   PATCH /cards/:cardId/block
    ```
+- **Request Body**: 
+   ```json
   {
-    "password": _.CARD_PASSWORD
+    "password": "1234"
   }
   ```
 
 ### Card Unblocking
 
-- **Endpoint**: `_.URL/cards/:cardId/unblock`
-- **Request Body**: 
+- **Endpoint**: 
+   ```http
+   PATCH /cards/:cardId/unblock
    ```
+- **Request Body**: 
+   ```json
   {
-    "password": _.CARD_PASSWORD
+    "password": "1234"
   }
   ```
   
 ### Card Recharge
 
-- **Endpoint**: `_.URL/cards/:cardId/recharge`
-- **Request Body**: 
+- **Endpoint**: 
+   ```http
+   POST /cards/:cardId/recharge
    ```
+- **Request Body**: 
+   ```json
   {
-    "amount": _.AMOUNT
+    "amount": 1000
   }
   ```
-- **Request Header**: `x-api-key: _.COMPANY_API_KEY`
+- **Request Header**: `x-api-key: "key.example.123"`
 
 ### Card Balance
 
-- **Endpoint**: `_.URL/cards/:cardId/balance`
+- **Endpoint**: 
+   ```http
+   GET /cards/:cardId/balance
+   ```
 - **Response Example**:
-    ```
+    ```json
     {
         "balance": 800,
         "transactions": [
@@ -170,14 +188,17 @@ The API is responsible for creating, reloading, activating, as well as processin
 
 **Notes:** The card type must be the same as the business type.
 
-- **Endpoint**: `_.URL/payments/pos`
-- **Request Body**: 
+- **Endpoint**: 
+   ```http
+   POST /payments/pos
    ```
+- **Request Body**: 
+   ```json
   {
     "cardId": 2,
-    "password": _.CARD_PASSWORD,
+    "password": "1234",
     "businessId": 5,
-    "amount: _.AMOUNT
+    "amount": 100
   }
   ```
 
@@ -185,9 +206,12 @@ The API is responsible for creating, reloading, activating, as well as processin
 
 **Notes:** The card type must be the same as the business type.
 
-- **Endpoint**: `_.URL/payments/online`
-- **Request Body**: 
+- **Endpoint**: 
+   ```http
+   POST /payments/online
    ```
+- **Request Body**: 
+   ```json
   {
     "cardInfo": {
         "cardNumber": "7175-2620-5613-5534",
@@ -196,6 +220,44 @@ The API is responsible for creating, reloading, activating, as well as processin
         "CVC": "053"
     },
     "businessId": 5,
-    "amount": _.AMOUNT
+    "amount": 100
+  }
+  ```
+### Virtual Card Creation
+
+- **Endpoint**: 
+   ```http
+   POST /cards/virtual/create
+   ```
+- **Request Body**: 
+   ```json
+  {
+    "originalCardId": 2,
+    "password": "1234"
+  }
+  ```
+- **Response Example**:
+    ```json
+    {
+      "cardId": 3,
+      "number": "6771-8953-1311-4172",
+      "cardholderName": "CICLANA M MADEIRA",
+      "securityCode": "094",
+      "expirationDate": "09/27",
+      "type": "health"
+    }
+    ```
+
+## Virtual Card Deletion
+
+- **Endpoint**: 
+   ```http
+   DELETE /cards/virtual/delete
+   ```
+- **Request Body**: 
+   ```json
+  {
+    "virtualCardId": 3,
+    "password": "1234"
   }
   ```
