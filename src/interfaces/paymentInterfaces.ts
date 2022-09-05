@@ -13,3 +13,12 @@ export interface OnlinePaymentData {
   businessId: number;
   amount: number;
 }
+
+export interface FormattedPayment {
+  id: number;
+  cardId: number;
+  businessId: number;
+  timestamp: string;
+  amount: number;
+  businessName: string;
+}
