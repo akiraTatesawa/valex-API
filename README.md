@@ -13,6 +13,8 @@
     * [Card Balance](#card-balance)
     * [POS Payment](#pos-payment)
     * [Online Payment](#online-payment)
+    * [Virtual Card Creation](#virtual-card-creation)
+    * [Virtual Card Deletion](#virtual-card-deletion)
 
 ## Project Description
 **Valex** is a voucher card API.
