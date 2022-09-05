@@ -1,4 +1,4 @@
-import { ErrorType } from "../types/errorTypes";
+import { ErrorType } from "../middlewares/errorHandlingMiddleware";
 
 export interface CustomError {
   type: ErrorType;
