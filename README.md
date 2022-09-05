@@ -4,6 +4,15 @@
 - [Project Description](#project-description)
 - [Technologies](#technologies)
 - [Running the project](#running-the-project)
+- [Features](#features)
+    * [Card Creation](#card-creation)
+    * [Card Activation](#card-activation)
+    * [Card Blocking](#card-blocking)
+    * [Card Unblocking](#card-unblocking)
+    * [Card Recharge](#card-recharge)
+    * [Card Balance](#card-balance)
+    * [POS Payment](#pos-payment)
+    * [Online Payment](#online-payment)
 
 ## Project Description
 **Valex** is a voucher card API.
@@ -60,6 +69,9 @@ The API is responsible for creating, reloading, activating, as well as processin
 - `_.CARD_TYPE` must only assume the following values: 'groceries', 'restaurants', 'transport', 'education', 'health';
 - `_.EMPLOYEE_ID` must be a valid employee id;
 - `_.COMPANY_API_KEY` must be a valid company key;
+- `_.CARD_PASSWORD` must be a string made up of four numbers;
+- `_.CARD_CVC` must be a string made up of 3 numbers and must be a valid card CVC;
+- `_.AMOUNT` must be an integer greater than zero;
 
 ### Card Creation
 
@@ -83,7 +95,8 @@ The API is responsible for creating, reloading, activating, as well as processin
       "type": "health"
     }
     ```
-### Card Validation
+    
+### Card Activation
 
 - **Endpoint**: `_.URL/cards/:cardId/activate`
 - **Request Body**: 
@@ -93,15 +106,96 @@ The API is responsible for creating, reloading, activating, as well as processin
     "CVC": _.CARD_CVC
   }
   ```
+
+### Card Blocking
+
+- **Endpoint**: `_.URL/cards/:cardId/block`
+- **Request Body**: 
+   ```
+  {
+    "password": _.CARD_PASSWORD
+  }
+  ```
+
+### Card Unblocking
+
+- **Endpoint**: `_.URL/cards/:cardId/unblock`
+- **Request Body**: 
+   ```
+  {
+    "password": _.CARD_PASSWORD
+  }
+  ```
+  
+### Card Recharge
+
+- **Endpoint**: `_.URL/cards/:cardId/recharge`
+- **Request Body**: 
+   ```
+  {
+    "amount": _.AMOUNT
+  }
+  ```
 - **Request Header**: `x-api-key: _.COMPANY_API_KEY`
+
+### Card Balance
+
+- **Endpoint**: `_.URL/cards/:cardId/balance`
 - **Response Example**:
     ```
     {
-      "cardId": 3,
-      "number": "7175-2620-5613-5534",
-      "cardholderName": "CICLANA M MADEIRA",
-      "securityCode": "074",
-      "expirationDate": "09/27",
-      "type": "health"
+        "balance": 800,
+        "transactions": [
+            {
+                "id": 2,
+                "cardId": 3,
+                "businessId": 5,
+                "timestamp": "2022-09-05T04:29:35.000Z",
+                "amount": 200,
+                "businessName": "Unimed"
+            }
+        ],
+        "recharges": [
+            {
+                "id": 1,
+                "cardId": 3,
+                "timestamp": "2022-09-05T04:28:12.000Z",
+                "amount": 1000
+            }
+        ]
     }
     ```
+
+### POS Payment
+
+**Notes:** The card type must be the same as the business type.
+
+- **Endpoint**: `_.URL/payments/pos`
+- **Request Body**: 
+   ```
+  {
+    "cardId": 2,
+    "password": _.CARD_PASSWORD,
+    "businessId": 5,
+    "amount: _.AMOUNT
+  }
+  ```
+
+### Online Payment
+
+**Notes:** The card type must be the same as the business type.
+
+- **Endpoint**: `_.URL/payments/online`
+- **Request Body**: 
+   ```
+  {
+    "cardInfo": {
+        "cardNumber": "7175-2620-5613-5534",
+        "cardholderName": "CICLANA M MADEIRA",
+        "expirationDate": "09/27",
+        "CVC": "053"
+    },
+    "businessId": 5,
+    "amount": _.AMOUNT
+  }
+  ```
